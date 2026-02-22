@@ -1,0 +1,44 @@
+[
+  {
+    "version": "AISS-1.0",
+    "agent_id": "5Z8nY7KpL9mN3qR4sT6uV8wX",
+    "timestamp": 1739395200,
+    "nonce": "550e8400-e29b-41d4-a716-446655440000",
+    "payload": {
+      "event_type": "initialization",
+      "model": "trading_bot_v1"
+    },
+    "previous_hash": "genesis",
+    "signature": "base64:RXZlbnQxU2lnbmF0dXJlRXhhbXBsZQ=="
+  },
+  {
+    "version": "AISS-1.0",
+    "agent_id": "5Z8nY7KpL9mN3qR4sT6uV8wX",
+    "timestamp": 1739395260,
+    "nonce": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+    "payload": {
+      "event_type": "trade_decision",
+      "symbol": "AAPL",
+      "action": "buy",
+      "quantity": 100
+    },
+    "previous_hash": "sha256:a3f7e8c9b1d5f2e4a8b3c7d1e9f5a2b6c8d4e0f6a1b7c3d9e5f1a7b3",
+    "signature": "base64:RXZlbnQyU2lnbmF0dXJlRXhhbXBsZQ=="
+  },
+  {
+    "version": "AISS-1.0",
+    "agent_id": "5Z8nY7KpL9mN3qR4sT6uV8wX",
+    "timestamp": 1739395320,
+    "nonce": "b47c9e68-7425-40de-944b-e07fc1f90ae7",
+    "payload": {
+      "event_type": "trade_executed",
+      "symbol": "AAPL",
+      "action": "buy",
+      "quantity": 100,
+      "price": 150.25,
+      "order_id": "ORD-123456"
+    },
+    "previous_hash": "sha256:b4e9f1d0a2c6e8b3f7a5c1d9e3f0a6b2c4d8e1f5a7b9c3d0e6f2a8b4",
+    "signature": "base64:RXZlbnQzU2lnbmF0dXJlRXhhbXBsZQ=="
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "version": "AISS-1.0",
+  "agent_id": "5Z8nY7KpL9mN3qR4sT6uV8wX",
+  "timestamp": 1739395200,
+  "nonce": "550e8400-e29b-41d4-a716-446655440000",
+  "payload": {
+    "event_type": "trade_decision",
+    "symbol": "AAPL",
+    "action": "buy",
+    "quantity": 100,
+    "price": 150.25,
+    "confidence": 0.92
+  },
+  "previous_hash": "genesis",
+  "signature": "base64:SGVsbG8gV29ybGQhIFRoaXMgaXMgYW4gZXhhbXBsZSBzaWduYXR1cmUu"
+}
