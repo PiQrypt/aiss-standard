@@ -1,0 +1,100 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aiss"
+version = "2.0.0"
+description = "Agent Identity and Signature Standard — cryptographic trust primitive for autonomous AI agents"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    { name = "PiQrypt", email = "contact@piqrypt.com" }
+]
+requires-python = ">=3.9"
+keywords = [
+    "cryptography", "identity", "agents", "ai", "signatures",
+    "audit", "post-quantum", "aiss", "pcp", "proof-of-continuity",
+    "ed25519", "dilithium", "hash-chain", "tamper-proof",
+    "autonomous-agents", "trust", "verifiable", "open-standard",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security :: Cryptography",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+dependencies = [
+    "PyNaCl>=1.5.0",
+    "canonicaljson>=2.0.0",
+    "base58>=2.1.0",
+    "cryptography>=41.0.0",
+]
+
+[project.optional-dependencies]
+post-quantum    = ["liboqs-python>=0.8.0"]
+post-quantum-py = ["dilithium-py>=0.1.0"]
+vigil           = []   # Vigil inclus dans le package, pas de dep supplémentaire
+dev = [
+    "pytest>=7.0.0,<9.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "mypy>=1.0.0",
+    "ruff>=0.1.0",
+]
+
+[project.scripts]
+aiss = "aiss.cli:main"
+
+[project.urls]
+Homepage      = "https://aiss-standard.org"
+Documentation = "https://github.com/piqrypt/aiss-spec"
+Repository    = "https://github.com/piqrypt/aiss-spec"
+"Bug Tracker" = "https://github.com/piqrypt/aiss-spec/issues"
+"Reference Implementation" = "https://github.com/piqrypt/piqrypt"
+
+[tool.setuptools.packages.find]
+where   = ["."]
+include = ["aiss*", "vigil*"]
+exclude = ["tests*", "docs*", "*.tests", "*.tests.*"]
+
+[tool.setuptools.package-data]
+"aiss"  = ["py.typed", "schemas/*.json"]
+"vigil" = ["py.typed", "*.html"]
+
+[tool.pytest.ini_options]
+testpaths    = ["tests"]
+python_files = ["test_*.py"]
+addopts      = "--cov=aiss --cov-report=term-missing -v"
+
+[tool.black]
+line-length    = 100
+target-version = ["py39"]
+
+[tool.ruff]
+line-length    = 100
+target-version = "py39"
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+
+[tool.ruff.lint.per-file-ignores]
+"aiss/__init__.py" = ["F401"]
+"aiss/*.py"        = ["E501", "E722", "E402"]
+
+[tool.mypy]
+python_version         = "3.9"
+warn_return_any        = true
+warn_unused_configs    = true
+disallow_untyped_defs  = false
+ignore_missing_imports = true
