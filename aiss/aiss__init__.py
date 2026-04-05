@@ -158,12 +158,18 @@ from aiss.logger import (
 )
 
 
+# ── AgentIdentity — developer-friendly API ───────────────────────────────────
+from aiss.agent_identity import AgentIdentity, SignedEvent
+
+
 def is_post_quantum_available() -> bool:
     """Returns True if liboqs is installed and AISS-2 hybrid signatures are available."""
     return _PQ_AVAILABLE
 
 
 __all__ = [
+    # AgentIdentity — developer-friendly API
+    "AgentIdentity", "SignedEvent",
     # Version
     "__version__", "__spec__",
     # Identity
