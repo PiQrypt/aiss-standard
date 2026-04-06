@@ -45,7 +45,7 @@ __author__  = "PiQrypt"
 __email__   = "contact@piqrypt.com"
 __license__ = "MIT"
 __url__     = "https://aiss-standard.org"
-__spec__    = "AISS RFC v2.0"
+__aiss_spec__ = "AISS RFC v2.0"
 
 # ── Core AISS-1 : Identity ────────────────────────────────────────────────────
 from aiss.identity import (
@@ -171,7 +171,7 @@ __all__ = [
     # AgentIdentity — developer-friendly API
     "AgentIdentity", "SignedEvent",
     # Version
-    "__version__", "__spec__",
+    "__version__", "__aiss_spec__",
     # Identity
     "generate_keypair", "derive_agent_id", "export_identity",
     "create_agent_identity", "load_agent_identity", "list_agent_identities",
