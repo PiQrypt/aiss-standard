@@ -77,7 +77,7 @@ testpaths    = ["tests"]
 python_files = ["test_*.py"]
 # importmode=importlib + pythonpath garantit que le repo local est chargé
 # avant tout package installé dans site-packages
-addopts      = "--import-mode=importlib --cov=aiss --cov-report=term-missing -v"
+addopts      = "--import-mode=prepend --cov=aiss --cov-report=term-missing -v"
 pythonpath   = ["."]
 # Ignorer les tests qui dépendent de modules piqrypt pas encore présents
 # (test_a2a, test_memory_index, test_vectors seront activés après copie complète)
