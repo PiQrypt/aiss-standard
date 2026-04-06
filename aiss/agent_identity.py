@@ -32,7 +32,6 @@ from aiss.stamp import stamp_event, stamp_genesis_event
 from aiss.verify import verify_event, verify_chain
 from aiss.chain import compute_event_hash, compute_chain_hash
 from aiss.exports import export_audit_chain
-from aiss.exceptions import InvalidSignatureError
 
 
 class SignedEvent:
