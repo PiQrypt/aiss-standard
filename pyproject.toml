@@ -63,10 +63,8 @@ Repository    = "https://github.com/piqrypt/aiss-spec"
 "Bug Tracker" = "https://github.com/piqrypt/aiss-spec/issues"
 "Reference Implementation" = "https://github.com/piqrypt/piqrypt"
 
-[tool.setuptools.packages.find]
-where   = ["."]
-include = ["aiss*", "vigil*"]
-exclude = ["tests*", "docs*", "*.tests", "*.tests.*"]
+[tool.setuptools]
+packages = ["aiss", "aiss.crypto", "vigil"]
 
 [tool.setuptools.package-data]
 "aiss"  = ["py.typed", "schemas/*.json"]
