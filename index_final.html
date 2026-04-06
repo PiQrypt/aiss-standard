@@ -1,0 +1,1315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AISS — Agent Identity and Signature Standard</title>
+<meta name="description" content="Cryptographic trust primitive for autonomous AI agents. Open standard, MIT licensed, post-quantum ready.">
+<meta property="og:title" content="AISS — Agent Identity and Signature Standard">
+<meta property="og:description" content="Cryptographic trust primitive for autonomous AI agents. Open standard, MIT, LLM-agnostic.">
+<meta property="og:url" content="https://aiss-standard.org">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://aiss-standard.org/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="AISS — Agent Identity and Signature Standard">
+<meta name="twitter:description" content="Cryptographic trust primitive for autonomous AI agents. MIT · Post-quantum ready · No blockchain.">
+<meta name="twitter:image" content="https://aiss-standard.org/og-image.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ── Reset & Variables ─────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0a0c0f;
+  --bg2:       #0f1218;
+  --bg3:       #141820;
+  --surface:   #1a1f2b;
+  --border:    #232a38;
+  --border2:   #2d3547;
+  --text:      #c8d0e0;
+  --text-dim:  #5a6480;
+  --text-mute: #3a4258;
+  --accent:    #00d4ff;
+  --accent2:   #0099cc;
+  --accent-glow: rgba(0, 212, 255, 0.12);
+  --green:     #00e5a0;
+  --amber:     #ffc44d;
+  --font-mono: 'Space Mono', monospace;
+  --font-body: 'DM Sans', sans-serif;
+  --radius:    6px;
+  --max:       1100px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ── Noise texture overlay ─────────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+/* ── Layout helpers ────────────────────────────────────────────────────────── */
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 32px; position: relative; }
+section { position: relative; }
+
+/* ── Navigation ────────────────────────────────────────────────────────────── */
+nav {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--border);
+  background: rgba(10, 12, 15, 0.92);
+  backdrop-filter: blur(16px);
+}
+.nav-inner {
+  max-width: var(--max); margin: 0 auto; padding: 0 32px;
+  height: 56px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.1em;
+  text-decoration: none;
+}
+.nav-logo span { color: var(--text-dim); font-weight: 400; }
+.nav-links {
+  display: flex; gap: 28px; list-style: none;
+}
+.nav-links a {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-decoration: none;
+  letter-spacing: 0.02em;
+  transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text); }
+
+/* ── Hero ──────────────────────────────────────────────────────────────────── */
+.hero {
+  padding: 160px 0 80px;
+  border-bottom: 1px solid var(--border);
+}
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  color: var(--accent);
+  text-transform: uppercase;
+  margin-bottom: 24px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.1s forwards;
+}
+
+.hero h1 {
+  font-family: var(--font-mono);
+  font-size: clamp(28px, 3.5vw, 42px);
+  font-weight: 700;
+  color: #e8edf5;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 20px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.2s forwards;
+}
+.hero h1 em { color: var(--accent); font-style: normal; }
+
+.hero-sub {
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin-bottom: 36px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.3s forwards;
+}
+
+.hero-pills {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin-bottom: 40px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.35s forwards;
+}
+.pill {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 4px 10px;
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  color: var(--text-dim);
+  letter-spacing: 0.06em;
+}
+.pill.accent { border-color: var(--accent2); color: var(--accent); }
+
+.hero-ctas {
+  display: flex; gap: 12px; flex-wrap: wrap;
+  opacity: 0;
+  animation: fadeUp 0.6s ease 0.4s forwards;
+}
+
+/* ── Buttons ───────────────────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-primary {
+  background: var(--accent);
+  color: #000;
+  border-color: var(--accent);
+}
+.btn-primary:hover {
+  background: #33ddff;
+  box-shadow: 0 0 24px rgba(0,212,255,0.3);
+  transform: translateY(-1px);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border2);
+}
+.btn-ghost:hover { border-color: var(--text-dim); transform: translateY(-1px); }
+
+/* ── Playground ────────────────────────────────────────────────────────────── */
+.playground-wrap {
+  opacity: 0;
+  animation: fadeIn 0.8s ease 0.5s forwards;
+}
+.playground {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.4), 0 0 0 1px rgba(0,212,255,0.05);
+}
+.pg-header {
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.pg-dots { display: flex; gap: 6px; }
+.pg-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--border2);
+}
+.pg-dot:nth-child(1) { background: #ff5f57; }
+.pg-dot:nth-child(2) { background: #febc2e; }
+.pg-dot:nth-child(3) { background: #28c840; }
+.pg-title {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-mute);
+  letter-spacing: 0.08em;
+}
+.pg-badge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--accent2);
+  border: 1px solid var(--accent2);
+  border-radius: 3px;
+  padding: 2px 6px;
+  opacity: 0.7;
+}
+
+.pg-code {
+  padding: 20px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.8;
+  border-bottom: 1px solid var(--border);
+}
+.kw  { color: #c792ea; }
+.fn  { color: var(--accent); }
+.str { color: var(--green); }
+.cm  { color: var(--text-mute); font-style: italic; }
+.op  { color: var(--amber); }
+
+.pg-run {
+  padding: 12px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
+}
+.run-btn {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #000;
+  background: var(--accent);
+  border: none;
+  border-radius: 4px;
+  padding: 7px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; gap: 6px;
+}
+.run-btn:hover { background: #33ddff; box-shadow: 0 0 16px rgba(0,212,255,0.35); }
+.run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.run-status {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-mute);
+}
+.run-status.ok { color: var(--green); }
+.run-status.running { color: var(--amber); }
+
+.pg-output {
+  padding: 20px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.7;
+  min-height: 120px;
+  color: var(--text-dim);
+}
+.out-label {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  color: var(--text-mute);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+.out-key   { color: var(--accent2); }
+.out-str   { color: var(--green); }
+.out-num   { color: var(--amber); }
+.out-bool  { color: #c792ea; }
+.cursor-blink {
+  display: inline-block;
+  width: 7px; height: 13px;
+  background: var(--accent);
+  animation: blink 1s step-end infinite;
+  vertical-align: middle;
+  margin-left: 2px;
+}
+
+/* ── Section: Problem ──────────────────────────────────────────────────────── */
+.section-problem {
+  padding: 100px 0;
+  border-bottom: 1px solid var(--border);
+}
+.section-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: var(--text-mute);
+  text-transform: uppercase;
+  margin-bottom: 40px;
+}
+.problem-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: start;
+}
+.problem-items { display: flex; flex-direction: column; gap: 20px; }
+.problem-item {
+  display: flex; gap: 14px; align-items: flex-start;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg2);
+  transition: border-color 0.2s;
+}
+.problem-item:hover { border-color: var(--border2); }
+.problem-icon {
+  width: 32px; height: 32px; flex-shrink: 0;
+  border-radius: 4px;
+  background: rgba(255,80,80,0.08);
+  border: 1px solid rgba(255,80,80,0.15);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+}
+.problem-text h4 {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: #e0e6f0;
+  margin-bottom: 4px;
+}
+.problem-text p { font-size: 13px; color: var(--text-dim); }
+
+.problem-answer {
+  border-left: 2px solid var(--accent);
+  padding-left: 28px;
+}
+.problem-answer h3 {
+  font-family: var(--font-mono);
+  font-size: 18px;
+  font-weight: 700;
+  color: #e0e6f0;
+  line-height: 1.4;
+  margin-bottom: 20px;
+}
+.problem-answer h3 em { color: var(--accent); font-style: normal; }
+.answer-items { display: flex; flex-direction: column; gap: 12px; }
+.answer-item {
+  display: flex; gap: 10px; align-items: center;
+  font-size: 14px; color: var(--text);
+}
+.check {
+  width: 18px; height: 18px; flex-shrink: 0;
+  border-radius: 50%;
+  background: rgba(0,229,160,0.1);
+  border: 1px solid rgba(0,229,160,0.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; color: var(--green);
+}
+
+/* ── Section: Primitives ───────────────────────────────────────────────────── */
+.section-primitives {
+  padding: 100px 0;
+  border-bottom: 1px solid var(--border);
+}
+.section-title {
+  font-family: var(--font-mono);
+  font-size: clamp(22px, 2.5vw, 30px);
+  font-weight: 700;
+  color: #e0e6f0;
+  margin-bottom: 12px;
+}
+.section-sub {
+  font-size: 15px;
+  color: var(--text-dim);
+  margin-bottom: 56px;
+  max-width: 520px;
+}
+.primitives-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.primitive-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px 20px;
+  transition: all 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.primitive-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+.primitive-card:hover { border-color: var(--border2); transform: translateY(-3px); }
+.primitive-card:hover::before { opacity: 1; }
+
+.primitive-num {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-mute);
+  letter-spacing: 0.1em;
+  margin-bottom: 14px;
+}
+.primitive-name {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+.primitive-desc {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+.primitive-rfc {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-mute);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 2px 7px;
+  display: inline-block;
+}
+
+/* ── Section: Stack ────────────────────────────────────────────────────────── */
+.section-stack {
+  padding: 100px 0;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+}
+.stack-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: center;
+}
+.stack-diagram {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.stack-layer {
+  padding: 18px 22px;
+  border: 1px solid var(--border);
+  position: relative;
+  transition: all 0.2s;
+  cursor: default;
+}
+.stack-layer:not(:last-child) { border-bottom: none; }
+.stack-layer:first-child  { border-radius: 8px 8px 0 0; }
+.stack-layer:last-child   { border-radius: 0 0 8px 8px; }
+
+.stack-layer.highlight {
+  background: rgba(0,212,255,0.05);
+  border-color: var(--accent2);
+  box-shadow: inset 3px 0 0 var(--accent);
+}
+.stack-layer:hover { background: var(--surface); }
+
+.layer-name {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: #e0e6f0;
+  margin-bottom: 3px;
+}
+.stack-layer.highlight .layer-name { color: var(--accent); }
+.layer-desc {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+.layer-tag {
+  position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid var(--border2);
+  color: var(--text-mute);
+}
+.stack-layer.highlight .layer-tag {
+  border-color: var(--accent2);
+  color: var(--accent);
+  background: rgba(0,212,255,0.06);
+}
+
+.stack-text h3 {
+  font-family: var(--font-mono);
+  font-size: 20px;
+  font-weight: 700;
+  color: #e0e6f0;
+  margin-bottom: 16px;
+  line-height: 1.3;
+}
+.stack-text p { font-size: 14px; color: var(--text-dim); margin-bottom: 14px; }
+.stack-text p strong { color: var(--text); }
+
+/* ── Section: Compliance ───────────────────────────────────────────────────── */
+.section-compliance {
+  padding: 100px 0;
+  border-bottom: 1px solid var(--border);
+}
+.compliance-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.compliance-table th {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-mute);
+  text-align: left;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.compliance-table td {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.compliance-table tr:last-child td { border-bottom: none; }
+.compliance-table tr:hover td { background: var(--bg2); }
+.fw-badge {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.compliance-note {
+  margin-top: 20px;
+  font-size: 12px;
+  color: var(--text-mute);
+  font-style: italic;
+}
+
+/* ── Section: Quickstart ───────────────────────────────────────────────────── */
+.section-start {
+  padding: 100px 0;
+  border-bottom: 1px solid var(--border);
+}
+.start-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+}
+.code-block {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.code-header {
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 16px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-mute);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.code-body {
+  padding: 20px;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.8;
+  overflow-x: auto;
+}
+
+/* ── Section: Spec links ───────────────────────────────────────────────────── */
+.section-spec {
+  padding: 80px 0;
+  border-bottom: 1px solid var(--border);
+}
+.spec-links {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.spec-link {
+  display: flex; align-items: center; gap: 14px;
+  padding: 20px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--text);
+  transition: all 0.2s;
+}
+.spec-link:hover {
+  border-color: var(--accent2);
+  background: var(--surface);
+  transform: translateY(-2px);
+}
+.spec-link-icon {
+  width: 36px; height: 36px; flex-shrink: 0;
+  background: var(--bg3);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+.spec-link-text h4 {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 2px;
+}
+.spec-link-text p { font-size: 12px; color: var(--text-dim); }
+
+/* ── Footer ────────────────────────────────────────────────────────────────── */
+footer {
+  padding: 48px 0;
+  border-top: 1px solid var(--border);
+}
+.footer-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 20px;
+}
+.footer-left {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-mute);
+  line-height: 1.8;
+}
+.footer-left strong { color: var(--text-dim); }
+.footer-links {
+  display: flex; gap: 20px; list-style: none;
+}
+.footer-links a {
+  font-size: 12px;
+  color: var(--text-mute);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-links a:hover { color: var(--text-dim); }
+.footer-credit {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-mute);
+  text-align: right;
+}
+.footer-credit a { color: var(--accent2); text-decoration: none; }
+
+/* ── Animations ────────────────────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Responsive ────────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero-grid, .problem-grid, .stack-grid, .start-grid { grid-template-columns: 1fr; gap: 40px; }
+  .primitives-grid { grid-template-columns: repeat(2, 1fr); }
+  .spec-links { grid-template-columns: 1fr; }
+  .hero { padding: 120px 0 60px; }
+}
+@media (max-width: 560px) {
+  .wrap { padding: 0 20px; }
+  .primitives-grid { grid-template-columns: 1fr; }
+  .nav-links { display: none; }
+  .nav-links.open {
+    display: flex; flex-direction: column; gap: 0;
+    position: fixed; top: 56px; left: 0; right: 0;
+    background: rgba(10,12,15,0.98);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 0;
+    z-index: 99;
+  }
+  .nav-links.open li a {
+    display: block; padding: 12px 24px;
+    font-size: 14px; border-bottom: 1px solid var(--border);
+  }
+  .burger { display: flex; }
+  .compliance-table { font-size: 12px; }
+}
+.burger {
+  display: none;
+  flex-direction: column; gap: 5px;
+  cursor: pointer; padding: 6px;
+  background: none; border: none;
+}
+.burger span {
+  display: block; width: 20px; height: 2px;
+  background: var(--text-dim);
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+.burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.burger.open span:nth-child(2) { opacity: 0; }
+.burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+</style>
+</head>
+<body>
+
+<!-- Navigation -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">AISS<span>-standard.org</span></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#playground">Playground</a></li>
+      <li><a href="#primitives">Standard</a></li>
+      <li><a href="#stack">Stack</a></li>
+      <li><a href="#spec">Spec</a></li>
+      <li><a href="https://github.com/piqrypt/aiss-standard" target="_blank">GitHub ↗</a></li>
+    </ul>
+    <button class="burger" id="burger" onclick="toggleMenu()" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Hero -->
+<main>
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-grid">
+      <div>
+        <div class="hero-eyebrow">Open Standard · RFC v2.0</div>
+        <h1>
+          Cryptographic trust<br>
+          for <em>autonomous</em><br>
+          AI agents.
+        </h1>
+        <p class="hero-sub">
+          A minimal protocol to make agent actions
+          verifiable and tamper-evident.
+        </p>
+        <p style="font-family:var(--font-mono); font-size:11px; color:var(--text-mute); margin-bottom:28px; letter-spacing:0.04em;">
+          No blockchain. No consensus. No central authority.
+        </p>
+        <div class="hero-pills">
+          <span class="pill accent">MIT License</span>
+          <span class="pill">Ed25519</span>
+          <span class="pill">NIST FIPS 204</span>
+          <span class="pill">RFC 8785</span>
+          <span class="pill">Post-quantum ready</span>
+        </div>
+        <div class="hero-ctas">
+          <a href="#playground" class="btn btn-primary">▶ Try it now</a>
+          <a href="https://github.com/piqrypt/aiss-standard" class="btn btn-ghost" target="_blank">GitHub</a>
+          <a href="#spec" class="btn btn-ghost">Read the spec</a>
+        </div>
+        <div style="margin-top:20px; padding:12px 16px; background:var(--bg2); border:1px solid var(--border); border-radius:var(--radius); display:inline-block;">
+          <code style="font-family:var(--font-mono); font-size:12px; color:var(--accent);">pip install aiss</code>
+        </div>
+      </div>
+
+      <!-- Playground -->
+      <div class="playground-wrap" id="playground">
+        <div class="playground">
+          <div class="pg-header">
+            <div class="pg-dots">
+              <div class="pg-dot"></div>
+              <div class="pg-dot"></div>
+              <div class="pg-dot"></div>
+            </div>
+            <span class="pg-title">aiss · playground</span>
+            <span class="pg-badge">LIVE</span>
+          </div>
+
+          <div style="padding:10px 20px; border-bottom:1px solid var(--border); display:flex; gap:20px; align-items:center;">
+            <span style="font-family:var(--font-mono); font-size:11px; color:var(--accent); letter-spacing:0.12em;">GENERATE</span>
+            <span style="color:var(--text-mute); font-size:10px;">→</span>
+            <span style="font-family:var(--font-mono); font-size:11px; color:var(--accent); letter-spacing:0.12em;">SIGN</span>
+            <span style="color:var(--text-mute); font-size:10px;">→</span>
+            <span style="font-family:var(--font-mono); font-size:11px; color:var(--accent); letter-spacing:0.12em;">VERIFY</span>
+            <span style="margin-left:auto; font-size:11px; color:var(--text-mute);">in the browser · no server</span>
+          </div>
+
+          <div class="pg-code">
+            <span class="kw">from</span> aiss <span class="kw">import</span> <span class="fn">AgentIdentity</span><br><br>
+            agent &nbsp;= <span class="fn">AgentIdentity</span>.<span class="fn">create</span>()<br>
+            event &nbsp;= agent.<span class="fn">stamp</span>(<span class="str">"user_prompted"</span>, {<span class="str">"data"</span>: <span class="str">"hello"</span>})<br>
+            <span class="kw">assert</span> agent.<span class="fn">verify</span>(event)<br>
+            <span class="cm"># → signed, hash-chained, tamper-evident</span>
+          </div>
+
+          <div class="pg-run">
+            <button class="run-btn" id="runBtn" onclick="runPlayground()">
+              ▶ RUN DEMO
+            </button>
+            <span class="run-status" id="runStatus">ready</span>
+          </div>
+
+          <div class="pg-output" id="pgOutput">
+            <div class="out-label">output</div>
+            <span style="color:var(--text-mute); font-size:12px;">Click RUN to generate a live signed event →</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Problem -->
+<section class="section-problem">
+  <div class="wrap">
+    <div class="section-label">The problem</div>
+    <div class="problem-grid">
+        <div class="problem-items reveal">
+        <div class="problem-item">
+          <div class="problem-icon">✗</div>
+          <div class="problem-text">
+            <h4>Logs can be modified</h4>
+            <p>No cryptographic proof of history.</p>
+          </div>
+        </div>
+        <div class="problem-item">
+          <div class="problem-icon">✗</div>
+          <div class="problem-text">
+            <h4>No verifiable authorship</h4>
+            <p>Identity is asserted, not proven.</p>
+          </div>
+        </div>
+        <div class="problem-item">
+          <div class="problem-icon">✗</div>
+          <div class="problem-text">
+            <h4>Vulnerable to quantum attacks</h4>
+            <p>Classical signatures will break. Most systems are not prepared.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="problem-answer reveal" style="transition-delay:0.15s">
+        <h3>AISS makes agent history<br><em>independently verifiable.</em></h3>
+        <div class="answer-items">
+          <div class="answer-item">
+            <div class="check">✓</div>
+            Cryptographic proof of authorship
+          </div>
+          <div class="answer-item">
+            <div class="check">✓</div>
+            Hash-chained — any modification is detectable
+          </div>
+          <div class="answer-item">
+            <div class="check">✓</div>
+            Portable — verify without the original infrastructure
+          </div>
+          <div class="answer-item">
+            <div class="check">✓</div>
+            Post-quantum hybrid signatures (ML-DSA-65)
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Primitives -->
+<section class="section-primitives" id="primitives">
+  <div class="wrap">
+    <p class="section-label">The standard</p>
+    <h2 class="section-title">Four primitives. Nothing more.</h2>
+    <p class="section-sub">AISS defines the minimal cryptographic surface for autonomous agent trust. No consensus, no blockchain, no central registry.</p>
+
+    <div class="primitives-grid">
+      <div class="primitive-card reveal">
+        <div class="primitive-num">01</div>
+        <div class="primitive-name">Identity</div>
+        <p class="primitive-desc">Deterministic agent ID derived from an Ed25519 keypair. No registration required.</p>
+        <span class="primitive-rfc">RFC §5–6</span>
+      </div>
+      <div class="primitive-card reveal" style="transition-delay:0.1s">
+        <div class="primitive-num">02</div>
+        <div class="primitive-name">Event chain</div>
+        <p class="primitive-desc">Signed, hash-linked, append-only history. Any modification breaks the chain.</p>
+        <span class="primitive-rfc">RFC §7–9</span>
+      </div>
+      <div class="primitive-card reveal" style="transition-delay:0.2s">
+        <div class="primitive-num">03</div>
+        <div class="primitive-name">Fork resolution</div>
+        <p class="primitive-desc">Deterministic canonical chain selection when concurrent writes occur.</p>
+        <span class="primitive-rfc">RFC §10</span>
+      </div>
+      <div class="primitive-card reveal" style="transition-delay:0.3s">
+        <div class="primitive-num">04</div>
+        <div class="primitive-name">A2A trust</div>
+        <p class="primitive-desc">Agent-to-agent handshake with co-signed events. Trust without a central authority.</p>
+        <span class="primitive-rfc">RFC §16</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Stack -->
+<section class="section-stack" id="stack">
+  <div class="wrap">
+    <div class="stack-grid">
+      <div class="reveal">
+        <p class="section-label">Architecture</p>
+        <h2 class="section-title">One standard.<br>Many implementations.</h2>
+        <p class="stack-text" style="margin-top:16px">
+          <p style="font-size:14px; color:var(--text-dim); margin-bottom:14px;">AISS defines the cryptographic foundation. Any system can build on top of it.</p>
+          <p style="font-family:var(--font-mono); font-size:12px; color:var(--accent); margin-bottom:14px; letter-spacing:0.04em;">AISS is independent. PiQrypt is one implementation.</p>
+          <p style="font-size:14px; color:var(--text-dim); margin-bottom:14px;"><strong style="color:var(--text)">Reference implementation:</strong> <a href="https://piqrypt.com" style="color:var(--accent2);" target="_blank">PiQrypt</a> (Python)</p>
+          <p style="font-size:14px; color:var(--text-dim); margin-bottom:14px;">Additional capabilities may exist in specific implementations.</p>
+          <p style="font-size:14px; color:var(--text-dim)">Other implementations welcome. See <a href="https://github.com/piqrypt/aiss-standard/blob/main/CONFORMANCE.md" style="color:var(--accent2)">CONFORMANCE.md</a>.</p>
+        </p>
+      </div>
+
+      <div class="stack-diagram reveal" style="transition-delay:0.15s">
+        <div class="stack-layer">
+          <div class="layer-name">TrustGate</div>
+          <div class="layer-desc">Governance & human oversight gate</div>
+          <span class="layer-tag">optional</span>
+        </div>
+        <div class="stack-layer">
+          <div class="layer-name">Vigil</div>
+          <div class="layer-desc">Behavioural monitoring & VRS dashboard</div>
+          <span class="layer-tag">optional</span>
+        </div>
+        <div class="stack-layer">
+          <div class="layer-name">PiQrypt</div>
+          <div class="layer-desc">Reference implementation</div>
+          <span class="layer-tag">implementation</span>
+        </div>
+        <div class="stack-layer highlight">
+          <div class="layer-name">AISS</div>
+          <div class="layer-desc">Identity · Event chain · Fork · A2A</div>
+          <span class="layer-tag">this package</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Compliance -->
+<section class="section-compliance">
+  <div class="wrap">
+    <p class="section-label">Compliance (indicative)</p>
+    <h2 class="section-title reveal">Built for regulated environments.</h2>
+    <p class="section-sub reveal" style="transition-delay:0.1s">AISS provides the cryptographic mechanisms that compliance frameworks require. Compliance depends on implementation.</p>
+
+    <table class="compliance-table reveal" style="transition-delay:0.2s">
+      <thead>
+        <tr>
+          <th>Framework</th>
+          <th>Control</th>
+          <th>AISS mechanism</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="fw-badge">EU AI Act</span> Art. 12</td>
+          <td style="color:var(--text-dim)">Inviolable logging</td>
+          <td style="color:var(--text-dim)">Hash-chained signed events</td>
+        </tr>
+        <tr>
+          <td><span class="fw-badge">SOC 2</span> CC6.6</td>
+          <td style="color:var(--text-dim)">Audit trail</td>
+          <td style="color:var(--text-dim)">AISS-1.0-AUDIT export</td>
+        </tr>
+        <tr>
+          <td><span class="fw-badge">NIST AI RMF</span> MEASURE 2.5</td>
+          <td style="color:var(--text-dim)">Traceability</td>
+          <td style="color:var(--text-dim)">Tamper-evident event history</td>
+        </tr>
+        <tr>
+          <td><span class="fw-badge">GDPR</span> Art. 5.1.f</td>
+          <td style="color:var(--text-dim)">Integrity</td>
+          <td style="color:var(--text-dim)">Fork detection + signatures</td>
+        </tr>
+        <tr>
+          <td><span class="fw-badge">HIPAA</span> §164.312</td>
+          <td style="color:var(--text-dim)">Audit controls</td>
+          <td style="color:var(--text-dim)">Immutable event chain</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="compliance-note reveal">Non-normative mapping. AISS does not provide compliance by itself.</p>
+  </div>
+</section>
+
+<!-- Install -->
+<section class="section-start">
+  <div class="wrap">
+    <p class="section-label">Get started</p>
+    <div class="start-grid">
+      <div>
+        <h2 class="section-title reveal">Up and running<br>in 30 seconds.</h2>
+        <p class="section-sub reveal" style="transition-delay:0.1s; margin-bottom:28px">
+          Install the package, generate an identity, stamp your first event.
+        </p>
+        <div class="hero-ctas reveal" style="transition-delay:0.2s">
+          <a href="https://pypi.org/project/aiss/" class="btn btn-primary" target="_blank">pip install aiss</a>
+          <a href="https://github.com/piqrypt/aiss-standard" class="btn btn-ghost" target="_blank">View on GitHub</a>
+        </div>
+      </div>
+
+      <div class="code-block reveal" style="transition-delay:0.15s">
+        <div class="code-header">
+          <span>quickstart.py</span>
+          <span style="color:var(--green)">● AISS-1.0</span>
+        </div>
+        <div class="code-body">
+          <span class="kw">from</span> aiss <span class="kw">import</span> <span class="fn">AgentIdentity</span><br>
+          <span class="kw">from</span> aiss.memory <span class="kw">import</span> <span class="fn">store_event</span><br><br>
+          <span class="cm"># Create identity</span><br>
+          agent = <span class="fn">AgentIdentity</span>.<span class="fn">create</span>()<br><br>
+          <span class="cm"># Stamp events</span><br>
+          e1 = agent.<span class="fn">stamp</span>(<span class="str">"init"</span>, {<span class="str">"version"</span>: <span class="str">"1.0"</span>})<br>
+          e2 = agent.<span class="fn">stamp</span>(<span class="str">"action"</span>, {<span class="str">"type"</span>: <span class="str">"buy"</span>})<br><br>
+          <span class="cm"># Verify chain integrity</span><br>
+          <span class="kw">assert</span> agent.<span class="fn">verify_chain</span>()<br><br>
+          <span class="cm"># Persist + export</span><br>
+          <span class="fn">store_event</span>(e2.<span class="op">raw</span>)<br>
+          audit = agent.<span class="fn">export</span>()
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Spec links -->
+<section class="section-spec" id="spec">
+  <div class="wrap">
+    <p class="section-label">Specification</p>
+    <h2 class="section-title reveal">Open. Auditable. Yours.</h2>
+    <p class="section-sub reveal" style="transition-delay:0.1s; margin-bottom:40px">
+      Full protocol specification, test vectors, and conformance matrix — publicly available.
+    </p>
+
+    <div class="spec-links">
+      <a href="https://github.com/piqrypt/aiss-standard/blob/main/docs/RFC_AISS_v2.0.md" class="spec-link reveal" target="_blank">
+        <div class="spec-link-icon">📄</div>
+        <div class="spec-link-text">
+          <h4>RFC v2.0</h4>
+          <p>Full protocol specification</p>
+        </div>
+      </a>
+      <a href="https://github.com/piqrypt/aiss-standard/blob/main/CONFORMANCE.md" class="spec-link reveal" style="transition-delay:0.1s" target="_blank">
+        <div class="spec-link-icon">✓</div>
+        <div class="spec-link-text">
+          <h4>CONFORMANCE.md</h4>
+          <p>Implementation matrix & test vectors</p>
+        </div>
+      </a>
+      <a href="https://github.com/piqrypt/aiss-standard" class="spec-link reveal" style="transition-delay:0.2s" target="_blank">
+        <div class="spec-link-icon">⚙</div>
+        <div class="spec-link-text">
+          <h4>GitHub</h4>
+          <p>Source code, issues, contributions</p>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- Footer -->
+<footer>
+  <div class="wrap">
+    <div class="footer-inner">
+      <div class="footer-left">
+        <strong>AISS — Agent Identity and Signature Standard</strong><br>
+        MIT License · e-Soleau DSO2026006483 (INPI France)
+      </div>
+      <ul class="footer-links">
+        <li><a href="https://github.com/piqrypt/aiss-standard">GitHub</a></li>
+        <li><a href="https://pypi.org/project/aiss/">PyPI</a></li>
+        <li><a href="https://github.com/piqrypt/aiss-standard/blob/main/docs/RFC_AISS_v2.0.md">RFC</a></li>
+        <li><a href="https://github.com/piqrypt/aiss-standard/blob/main/CONTRIBUTING.md">Contributing</a></li>
+      </ul>
+      <div class="footer-credit">
+        Reference implementation<br>
+        <a href="https://piqrypt.com" target="_blank">PiQrypt →</a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── Mobile burger menu ────────────────────────────────────────────────────── */
+function toggleMenu() {
+  const nav    = document.getElementById('navLinks');
+  const burger = document.getElementById('burger');
+  const isOpen = nav.classList.toggle('open');
+  burger.classList.toggle('open');
+  burger.setAttribute('aria-expanded', isOpen);
+}
+// Close on link click
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => {
+    document.getElementById('navLinks').classList.remove('open');
+    document.getElementById('burger').classList.remove('open');
+  });
+});
+
+/* ── Auto-run playground on first view ────────────────────────────────────── */
+let playgroundHasRun = false;
+const pgObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting && !playgroundHasRun) {
+      playgroundHasRun = true;
+      setTimeout(() => runPlayground(), 600);
+    }
+  });
+}, { threshold: 0.4 });
+const pgEl = document.getElementById('playground');
+if (pgEl) pgObserver.observe(pgEl);
+
+/* ── Scroll reveal ─────────────────────────────────────────────────────────── */
+const observer = new IntersectionObserver(
+  entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }),
+  { threshold: 0.08 }
+);
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+/* ── Playground — WebCrypto Ed25519 ───────────────────────────────────────── */
+async function sha256hex(data) {
+  const bytes = typeof data === 'string' ? new TextEncoder().encode(data) : data;
+  const buf = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function toBase58(bytes) {
+  const ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+  let num = BigInt('0x' + Array.from(bytes).map(b => b.toString(16).padStart(2,'0')).join(''));
+  let result = '';
+  while (num > 0n) { result = ALPHABET[Number(num % 58n)] + result; num /= 58n; }
+  return result.padStart(32, '1').slice(0, 32);
+}
+
+function toBase64(bytes) {
+  return btoa(String.fromCharCode(...bytes));
+}
+
+function uuidv4() {
+  return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+  );
+}
+
+async function runPlayground() {
+  const btn    = document.getElementById('runBtn');
+  const status = document.getElementById('runStatus');
+  const output = document.getElementById('pgOutput');
+
+  btn.disabled = true;
+  status.className = 'run-status running';
+  status.textContent = 'running…';
+  output.innerHTML = '<div class="out-label">output</div>';
+
+  await new Promise(r => setTimeout(r, 180));
+
+  try {
+    // 1. Generate Ed25519 keypair
+    const keyPair = await crypto.subtle.generateKey(
+      { name: 'Ed25519' }, true, ['sign', 'verify']
+    );
+    const pubKeyBuf  = await crypto.subtle.exportKey('raw', keyPair.publicKey);
+    const pubBytes   = new Uint8Array(pubKeyBuf);
+    const pubHex     = Array.from(pubBytes).map(b => b.toString(16).padStart(2,'0')).join('');
+    const pubKeyHash = await sha256hex(pubBytes);
+    const agent_id   = toBase58(new Uint8Array(pubKeyHash.match(/.{2}/g).map(b => parseInt(b,16))));
+
+    // 2. Build event
+    const timestamp   = Math.floor(Date.now() / 1000);
+    const nonce       = uuidv4();
+    const prevHashRaw = await sha256hex(pubBytes);
+
+    const payload = { event_type: 'user_prompted', data: 'hello' };
+    const eventUnsigned = {
+      version: 'AISS-1.0',
+      agent_id,
+      timestamp,
+      nonce,
+      payload,
+      previous_hash: prevHashRaw
+    };
+
+    // 3. Canonicalize (sorted keys, no spaces)
+    const canonical = JSON.stringify(eventUnsigned, Object.keys(eventUnsigned).sort());
+    const msgBytes  = new TextEncoder().encode(canonical);
+
+    // 4. Sign
+    const sigBuf  = await crypto.subtle.sign('Ed25519', keyPair.privateKey, msgBytes);
+    const sigB64  = toBase64(new Uint8Array(sigBuf));
+
+    // 5. Compute event hash
+    const sigBytes    = new Uint8Array(sigBuf);
+    const eventFull   = { ...eventUnsigned, signature: sigB64 };
+    const eventHash   = await sha256hex(new TextEncoder().encode(JSON.stringify(eventFull, Object.keys(eventFull).sort())));
+
+    // 6. Verify
+    const valid = await crypto.subtle.verify('Ed25519', keyPair.publicKey, sigBuf, msgBytes);
+
+    // 7. Render output with typewriter
+    const result = {
+      agent_id:      agent_id,
+      event_type:    payload.event_type,
+      payload:       payload,
+      signature:     sigB64.slice(0, 20) + '...',
+      hash:          eventHash.slice(0, 16) + '...',
+      timestamp,
+      verified:      valid
+    };
+
+    status.className = 'run-status ok';
+    status.textContent = valid ? '✓ verified' : '✗ failed';
+
+    await typewriteJSON(output, result);
+
+  } catch (err) {
+    output.innerHTML += `<br><span style="color:#ff6b6b">Error: ${err.message}</span>`;
+    status.className = 'run-status';
+    status.textContent = 'error';
+  }
+
+  btn.disabled = false;
+}
+
+async function typewriteJSON(container, obj) {
+  const lines = [];
+  lines.push('<span style="color:var(--text-dim)">{</span>');
+
+  const keys = Object.keys(obj);
+  for (let i = 0; i < keys.length; i++) {
+    const k = keys[i];
+    const v = obj[k];
+    const comma = i < keys.length - 1 ? ',' : '';
+    let valHtml;
+    if (typeof v === 'string')      valHtml = `<span class="out-str">"${v}"</span>`;
+    else if (typeof v === 'number') valHtml = `<span class="out-num">${v}</span>`;
+    else if (typeof v === 'boolean') valHtml = `<span class="out-bool">${v}</span>`;
+    else valHtml = `<span class="out-str">${JSON.stringify(v)}</span>`;
+    lines.push(`  <span class="out-key">"${k}"</span>: ${valHtml}${comma}`);
+  }
+  lines.push('<span style="color:var(--text-dim)">}</span>');
+
+  const label = '<div class="out-label">signed event</div>';
+  const cursor = '<span class="cursor-blink"></span>';
+  container.innerHTML = label + cursor;
+
+  for (const line of lines) {
+    await new Promise(r => setTimeout(r, 55));
+    container.innerHTML = label + line + '<br>' +
+      container.innerHTML.replace(label, '').replace(cursor, '') + cursor;
+
+    // scroll to bottom
+    container.scrollTop = container.scrollHeight;
+  }
+
+  // Remove cursor after done
+  await new Promise(r => setTimeout(r, 600));
+  container.innerHTML = container.innerHTML.replace(cursor, '');
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,107 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+venv/
+ENV/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+.tox/
+.nox/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+
+# Jupyter
+.ipynb_checkpoints
+
+# ════════════════════════════════════════════════════════════════
+# AISS — SENSITIVE DATA (NEVER COMMIT)
+# ════════════════════════════════════════════════════════════════
+
+# AISS local storage directory
+.aiss/
+
+# Private keys — all forms
+**/private.key.json
+**/private.key.enc
+**/private_key*
+**/*.key.json
+**/*.key.enc
+
+# Agent identity files (local, not test vectors)
+**/agent.json
+**/demo-agent.json
+**/*-agent.json
+**/test-agent.json
+# Keep test vectors
+!test_vectors/identity.json
+
+# Local event storage
+**/events/plain/
+**/events/encrypted/
+
+# SQLite index
+**/index.db
+
+# TSI baseline
+**/tsi/
+
+# Environment
+.env
+.env.*
+*.env
+
+# ════════════════════════════════════════════════════════════════
+# BUILD & ARTIFACTS
+# ════════════════════════════════════════════════════════════════
+*.tar.gz
+*.zip
+*.whl
+dist/
+build/
+docs/_build/
+site/
+*.tmp
+*.log
+*.bak

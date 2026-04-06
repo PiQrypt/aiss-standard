@@ -22,7 +22,7 @@ from aiss.replay import detect_replay_attacks
 from aiss.crypto import ed25519
 
 
-VECTORS_DIR = Path(__file__).parent.parent / "test_vectors"
+VECTORS_DIR = Path(__file__).parent / "test_vectors"
 
 
 class TestCanonicalVectors(unittest.TestCase):
