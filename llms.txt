@@ -1,0 +1,106 @@
+# AISS — Agent Identity and Signature Standard
+
+> Cryptographic trust primitive for autonomous AI agents.
+> Open standard · MIT License · No blockchain · No central authority
+
+## What is AISS
+
+AISS (Agent Identity and Signature Standard) defines the cryptographic foundation
+for making autonomous AI agent actions verifiable, portable, and tamper-evident.
+
+It is an open protocol specification — not a product, not a service.
+Any system can implement it. Any agent can adopt it.
+
+## Core primitives
+
+- **Identity** — Deterministic agent ID derived from an Ed25519 public key (RFC §5–6)
+- **Event chain** — Signed, hash-linked, append-only history (RFC §7–9)
+- **Fork resolution** — Deterministic canonical chain selection (RFC §10)
+- **A2A trust** — Agent-to-agent handshake with co-signed events (RFC §16)
+
+## The problem AISS solves
+
+Agent systems today produce logs that can be modified, lack cryptographic proof
+of authorship, and rely on classical signatures vulnerable to quantum attacks.
+
+AISS makes agent history independently verifiable — without access to the
+original infrastructure, without a central registry, without blockchain.
+
+## Cryptographic algorithms
+
+- AISS-1: Ed25519 (RFC 8032) + SHA-256 + RFC 8785 canonicalization
+- AISS-2: Ed25519 + ML-DSA-65 hybrid (NIST FIPS 204, post-quantum)
+
+## Quick integration
+
+```python
+pip install aiss
+```
+
+```python
+from aiss import AgentIdentity
+
+agent = AgentIdentity.create()
+event = agent.stamp("decision_made", {"action": "approved", "confidence": 0.97})
+assert agent.verify(event)
+print(event["hash"])   # tamper-evident proof
+```
+
+## Event structure (AISS-1.0)
+
+```json
+{
+  "version": "AISS-1.0",
+  "agent_id": "3gFw2S1NT6dzo9vTPQ6JNWEwYFysZn8F",
+  "timestamp": 1771845244,
+  "nonce": "d363c917-ca77-4c63-94d4-c1f5f93261d2",
+  "payload": { "event_type": "decision_made", "action": "approved" },
+  "previous_hash": "27c5e890fa306d60...",
+  "signature": "eA3oT793bV/hJnDX..."
+}
+```
+
+## Compliance relevance
+
+AISS provides the cryptographic mechanisms required by:
+- EU AI Act Art. 12 — inviolable logging for high-risk AI systems
+- SOC 2 CC6.6 — tamper-evident audit trails
+- NIST AI RMF MEASURE 2.5 — traceability of agent actions
+- GDPR Art. 5.1.f — integrity of personal data processing records
+- HIPAA §164.312 — immutable audit controls
+
+Non-normative mapping. AISS does not provide compliance by itself.
+
+## PCP — Proof of Continuity Protocol
+
+AISS is Layer 1 of the Proof of Continuity Protocol (PCP):
+
+```
+AISS      — identity · event chain · fork resolution · A2A
+PiQrypt   — reference implementation (monitoring, governance, certified exports)
+```
+
+AISS is independent. PiQrypt is one implementation.
+
+## Specification
+
+- Full RFC: https://github.com/piqrypt/aiss-standard/blob/main/docs/RFC_AISS_v2.0.md
+- Conformance: https://github.com/piqrypt/aiss-standard/blob/main/CONFORMANCE.md
+- GitHub: https://github.com/piqrypt/aiss-standard
+- PyPI: https://pypi.org/project/aiss/
+
+## Reference implementation
+
+PiQrypt (Python): https://piqrypt.com
+Adds: Vigil monitoring · TrustGate governance · certified exports · 9 framework bridges
+
+## IP
+
+Protocol concepts deposited via e-Soleau (INPI France):
+- DSO2026006483 — 19 February 2026
+- DSO2026009143 — 12 March 2026
+
+## Contact
+
+- Spec questions / contributions: https://github.com/piqrypt/aiss-standard/issues
+- Security: contact@piqrypt.com

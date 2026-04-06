@@ -4,7 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AISS — Agent Identity and Signature Standard</title>
-<meta name="description" content="Cryptographic trust primitive for autonomous AI agents. Open standard, MIT licensed, post-quantum ready.">
+<meta name="description" content="Cryptographic trust primitive for autonomous AI agents. Open standard, MIT licensed, post-quantum ready. Verifiable agent identity, tamper-evident event chains, EU AI Act compliant.">
+<meta name="keywords" content="AI agent identity, cryptographic audit trail, tamper-evident logging, autonomous agent trust, post-quantum signatures, Ed25519, ML-DSA-65, NIST FIPS 204, agent accountability, verifiable AI, EU AI Act compliance, SOC2 audit trail, HIPAA AI agents, agent event chain, hash chain, open standard, PCP protocol, proof of continuity, agent governance, AI agent security, OWASP agentic AI">
+<meta name="author" content="PiQrypt">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://aiss-standard.org/">
+<meta property="og:type" content="website">
 <meta property="og:title" content="AISS — Agent Identity and Signature Standard">
 <meta property="og:description" content="Cryptographic trust primitive for autonomous AI agents. Open standard, MIT, LLM-agnostic.">
 <meta property="og:url" content="https://aiss-standard.org">
@@ -15,6 +20,7 @@
 <meta name="twitter:description" content="Cryptographic trust primitive for autonomous AI agents. MIT · Post-quantum ready · No blockchain.">
 <meta name="twitter:image" content="https://aiss-standard.org/og-image.png">
 
+<link rel="sitemap" type="application/xml" href="/sitemap.xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 
@@ -1124,6 +1130,7 @@ footer {
         <li><a href="https://pypi.org/project/aiss/">PyPI</a></li>
         <li><a href="https://github.com/piqrypt/aiss-standard/blob/main/docs/RFC_AISS_v2.0.md">RFC</a></li>
         <li><a href="https://github.com/piqrypt/aiss-standard/blob/main/CONTRIBUTING.md">Contributing</a></li>
+        <li><a href="/legal.html">Mentions légales</a></li>
       </ul>
       <div class="footer-credit">
         Reference implementation<br>
@@ -1149,19 +1156,6 @@ document.querySelectorAll('.nav-links a').forEach(a => {
     document.getElementById('burger').classList.remove('open');
   });
 });
-
-/* ── Auto-run playground on first view ────────────────────────────────────── */
-let playgroundHasRun = false;
-const pgObserver = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting && !playgroundHasRun) {
-      playgroundHasRun = true;
-      setTimeout(() => runPlayground(), 600);
-    }
-  });
-}, { threshold: 0.4 });
-const pgEl = document.getElementById('playground');
-if (pgEl) pgObserver.observe(pgEl);
 
 /* ── Scroll reveal ─────────────────────────────────────────────────────────── */
 const observer = new IntersectionObserver(
@@ -1297,7 +1291,7 @@ async function typewriteJSON(container, obj) {
   container.innerHTML = label + cursor;
 
   for (const line of lines) {
-    await new Promise(r => setTimeout(r, 55));
+    await new Promise(r => setTimeout(r, 120));
     container.innerHTML = label + line + '<br>' +
       container.innerHTML.replace(label, '').replace(cursor, '') + cursor;
 
