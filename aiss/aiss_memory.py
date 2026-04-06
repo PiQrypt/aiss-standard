@@ -30,7 +30,6 @@ v1.8.4 additions:
 
 import json
 import time
-import hashlib
 from pathlib import Path
 from typing import List, Dict, Any, Optional
 from datetime import datetime, timezone
@@ -52,7 +51,6 @@ except ImportError:
 try:
     from aiss.agent_registry import (
         get_events_plain_dir as _reg_plain_dir,
-        get_keys_dir         as _reg_keys_dir,
         init_agent_dirs      as _reg_init_dirs,
         resolve_agent_name   as _resolve_agent,
     )
@@ -436,8 +434,10 @@ def search_events(
 
     for event in events:
         ts = event.get("timestamp", 0)
-        if after  and ts < after:  continue
-        if before and ts > before: continue
+        if after and ts < after:
+            continue
+        if before and ts > before:
+            continue
 
         if _participants:
             agent_match = event.get("agent_id", "") in _participants
@@ -524,8 +524,10 @@ def get_memory_stats(
             months.append({"month": f.stem, "count": count})
             for e in events:
                 ts = e.get("timestamp", 0)
-                if oldest_ts is None or ts < oldest_ts: oldest_ts = ts
-                if newest_ts is None or ts > newest_ts: newest_ts = ts
+                if oldest_ts is None or ts < oldest_ts:
+                    oldest_ts = ts
+                if newest_ts is None or ts > newest_ts:
+                    newest_ts = ts
         except Exception:
             pass
 

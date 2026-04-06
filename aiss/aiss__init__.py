@@ -129,9 +129,9 @@ from aiss.authority import (
 # Requires: pip install aiss[post-quantum]
 try:
     from aiss.stamp_aiss2 import (
-        stamp_event_aiss2_hybrid,
-        stamp_genesis_event_aiss2_hybrid,
-        verify_aiss2_hybrid,
+        stamp_event_aiss2_hybrid,        # noqa: F401
+        stamp_genesis_event_aiss2_hybrid, # noqa: F401
+        verify_aiss2_hybrid,             # noqa: F401
     )
     _PQ_AVAILABLE = True
 except ImportError:

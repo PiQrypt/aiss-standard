@@ -27,7 +27,7 @@ from typing import Dict, Any, Optional, List
 from aiss.crypto import ed25519, dilithium
 from aiss.canonical import canonicalize
 from aiss.stamp import generate_nonce
-from aiss.exceptions import CryptoBackendError, AISSError
+from aiss.exceptions import CryptoBackendError
 from aiss.logger import get_logger
 
 logger = get_logger(__name__)

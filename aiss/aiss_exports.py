@@ -19,7 +19,6 @@ import time
 from typing import Dict, Any, List, Optional
 
 from aiss.chain import compute_chain_hash
-from aiss.exceptions import AISSError
 
 
 # ─── Core export ─────────────────────────────────────────────────────────────
