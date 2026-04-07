@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "aiss-standard"
-version = "2.0.1"
+version = "2.0.2"
 description = "Agent Identity and Signature Standard — cryptographic trust primitive for autonomous AI agents"
 readme = "README.md"
 license = {text = "MIT"}
@@ -58,9 +58,9 @@ aiss = "aiss.cli:main"
 
 [project.urls]
 Homepage      = "https://aiss-standard.org"
-Documentation = "https://github.com/piqrypt/aiss-spec"
-Repository    = "https://github.com/piqrypt/aiss-spec"
-"Bug Tracker" = "https://github.com/piqrypt/aiss-spec/issues"
+Documentation = "https://github.com/piqrypt/aiss-standard"
+Repository    = "https://github.com/piqrypt/aiss-standard"
+"Bug Tracker" = "https://github.com/piqrypt/aiss-standard/issues"
 "Reference Implementation" = "https://github.com/piqrypt/piqrypt"
 
 [tool.setuptools]
