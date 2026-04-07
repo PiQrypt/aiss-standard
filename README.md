@@ -3,7 +3,7 @@
 Cryptographic trust primitive for autonomous AI agents.
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
-[![PyPI](https://img.shields.io/pypi/v/aiss)](https://pypi.org/project/aiss/)
+[![PyPI](https://img.shields.io/pypi/v/aiss-standard)](https://pypi.org/project/aiss-standard/)
 [![Python](https://img.shields.io/badge/python-3.9+-blue)](https://www.python.org/)
 [![NIST FIPS 204](https://img.shields.io/badge/NIST%20FIPS%20204-ML--DSA--65-purple)](https://csrc.nist.gov/pubs/fips/204/final)
 [![RFC 8785](https://img.shields.io/badge/RFC%208785-JCS-green)](https://datatracker.ietf.org/doc/html/rfc8785)
