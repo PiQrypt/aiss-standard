@@ -1,11 +1,10 @@
-# SPDX-License-Identifier: Elastic-2.0
+# SPDX-License-Identifier: MIT
 # Copyright (c) 2026 PiQrypt Inc.
 # e-Soleau: DSO2026006483 (19/02/2026) -- DSO2026009143 (12/03/2026)
 #
-# Licensed under the Elastic License 2.0 (ELv2).
-# You may not provide this software as a hosted or managed service
-# to third parties without a commercial license.
-# Commercial license: contact@piqrypt.com
+# sync: generated from piqrypt@v1.8.7 — do not edit manually
+# Source: https://github.com/piqrypt/piqrypt/blob/main//home/runner/work/piqrypt/piqrypt/piqrypt/aiss/history.py
+# To modify: edit in piqrypt, changes will be synced on next release
 
 """
 Agent History — v1.6
@@ -105,7 +104,7 @@ def load_full_history(
     # Step 1: Get the full identity chain via index
     identity_chain = _resolve_identity_chain(agent_id, max_depth=max_depth)
 
-    logger.debug(f"[PiQrypt] Full history: resolved chain {identity_chain}")
+    logger.debug(f"[AISS] Full history: resolved chain {identity_chain}")
 
     if not identity_chain:
         # Fallback: just load this agent's events
@@ -164,10 +163,10 @@ def _resolve_identity_chain(agent_id: str, max_depth: int = 20) -> List[str]:
         with get_index(encrypted=encrypted) as idx:
             chain = idx.get_full_identity_chain(agent_id)
             if len(chain) >= 1:
-                logger.debug(f"[PiQrypt] Identity chain (index): {chain}")
+                logger.debug(f"[AISS] Identity chain (index): {chain}")
                 return chain
     except Exception as e:
-        logger.debug(f"[PiQrypt] Index unavailable for chain resolution: {e}")
+        logger.debug(f"[AISS] Index unavailable for chain resolution: {e}")
 
     # Slow path: linear scan
     return _resolve_chain_linear_scan(agent_id, max_depth=max_depth)

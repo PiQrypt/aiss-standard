@@ -1,11 +1,10 @@
-# SPDX-License-Identifier: Elastic-2.0
+# SPDX-License-Identifier: MIT
 # Copyright (c) 2026 PiQrypt Inc.
 # e-Soleau: DSO2026006483 (19/02/2026) -- DSO2026009143 (12/03/2026)
 #
-# Licensed under the Elastic License 2.0 (ELv2).
-# You may not provide this software as a hosted or managed service
-# to third parties without a commercial license.
-# Commercial license: contact@piqrypt.com
+# sync: generated from piqrypt@v1.8.7 — do not edit manually
+# Source: https://github.com/piqrypt/piqrypt/blob/main//home/runner/work/piqrypt/piqrypt/piqrypt/aiss/index.py
+# To modify: edit in piqrypt, changes will be synced on next release
 
 """
 Memory Index System — v1.6
@@ -13,7 +12,7 @@ Memory Index System — v1.6
 Provides fast search over encrypted/plaintext memory using SQLite.
 
 Architecture:
-    ~/.piqrypt/events/
+    ~/.aiss/events/
     ├── plain/
     │   ├── 2025-01.json
     │   └── index.db         # SQLite index (Free)
@@ -129,7 +128,7 @@ class MemoryIndex:
         conn.executescript(SCHEMA)
         conn.commit()
         conn.close()
-        logger.debug(f"[PiQrypt] Index created at {self.index_path}")
+        logger.debug(f"[AISS] Index created at {self.index_path}")
 
     def _migrate_schema(self):
         """
@@ -148,7 +147,7 @@ class MemoryIndex:
             for col_name, col_type in MIGRATION_V2_COLUMNS:
                 if col_name not in existing:
                     conn.execute(f"ALTER TABLE events_index ADD COLUMN {col_name} {col_type}")
-                    logger.debug(f"[PiQrypt] Index migration: added column {col_name}")
+                    logger.debug(f"[AISS] Index migration: added column {col_name}")
                     migrated = True
 
             if migrated:
@@ -158,10 +157,10 @@ class MemoryIndex:
                     except Exception:
                         pass  # Index may already exist
                 conn.commit()
-                logger.info("[PiQrypt] Index migrated to v1.6 schema")
+                logger.info("[AISS] Index migrated to v1.6 schema")
 
         except Exception as e:
-            logger.warning(f"[PiQrypt] Schema migration warning: {e}")
+            logger.warning(f"[AISS] Schema migration warning: {e}")
         finally:
             conn.close()
 
@@ -499,7 +498,7 @@ class MemoryIndex:
         self.conn.execute("DELETE FROM events_index")
         self.conn.commit()
         self.add_events_batch(events)
-        logger.info(f"[PiQrypt] Index rebuilt: {len(events)} events")
+        logger.info(f"[AISS] Index rebuilt: {len(events)} events")
 
     def vacuum(self):
         """Optimize database (reclaim space, rebuild indexes)."""

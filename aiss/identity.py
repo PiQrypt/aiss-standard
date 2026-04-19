@@ -4,6 +4,9 @@
 #
 # Part of the AISS protocol specification.
 # Free to use, modify, and redistribute -- see root LICENSE for details.
+# sync: generated from piqrypt@v1.8.7 — do not edit manually
+# Source: https://github.com/piqrypt/piqrypt/blob/main//home/runner/work/piqrypt/piqrypt/piqrypt/aiss/identity.py
+# To modify: edit in piqrypt, changes will be synced on next release
 
 """
 Agent Identity Management (RFC Sections 5-6)
@@ -15,7 +18,7 @@ This module implements:
 
 v1.8.4 additions:
 - create_agent_identity() : création complète avec nom + passphrase + stockage
-- load_agent_identity()   : chargement depuis ~/.piqrypt/agents/<n>/
+- load_agent_identity()   : chargement depuis ~/.aiss/agents/<n>/
 - list_agent_identities() : liste tous les agents enregistrés
 """
 
@@ -306,7 +309,7 @@ def create_agent_identity(
 ) -> Dict[str, Any]:
     """
     Crée une identité complète pour un agent et la stocke dans
-    ~/.piqrypt/agents/<agent_name>/ (ou base_dir/agents/<agent_name>/ si fourni).
+    ~/.aiss/agents/<agent_name>/ (ou base_dir/agents/<agent_name>/ si fourni).
 
     Args:
         agent_name: Nom lisible de l'agent (ex: "trading_bot_A")
@@ -315,7 +318,7 @@ def create_agent_identity(
         metadata:   Métadonnées optionnelles (description, version, etc.)
         tier:       "free" ou "pro"
         base_dir:   Répertoire racine optionnel (utile en tests/CI).
-                    Si omis, utilise ~/.piqrypt/agents/.
+                    Si omis, utilise ~/.aiss/agents/.
 
     Returns:
         Dict avec identity, agent_id, agent_name, key_path, encrypted

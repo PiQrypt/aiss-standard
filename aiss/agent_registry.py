@@ -1,11 +1,10 @@
-# SPDX-License-Identifier: Elastic-2.0
+# SPDX-License-Identifier: MIT
 # Copyright (c) 2026 PiQrypt Inc.
 # e-Soleau: DSO2026006483 (19/02/2026) -- DSO2026009143 (12/03/2026)
 #
-# Licensed under the Elastic License 2.0 (ELv2).
-# You may not provide this software as a hosted or managed service
-# to third parties without a commercial license.
-# Commercial license: contact@piqrypt.com
+# sync: generated from piqrypt@v1.8.7 — do not edit manually
+# Source: https://github.com/piqrypt/piqrypt/blob/main//home/runner/work/piqrypt/piqrypt/piqrypt/aiss/agent_registry.py
+# To modify: edit in piqrypt, changes will be synced on next release
 
 """
 Agent Registry — PiQrypt v1.8.4
@@ -15,8 +14,8 @@ Gère la résolution des répertoires, la création des structures,
 et la liste des agents enregistrés.
 
 Stockage :
-    ~/.piqrypt/registry.json       ← liste des agents
-    ~/.piqrypt/agents/<name>/      ← répertoire par agent
+    ~/.aiss/registry.json       ← liste des agents
+    ~/.aiss/agents/<name>/      ← répertoire par agent
 
     Répertoire agent :
         identity.json              ← document identité public
@@ -44,7 +43,7 @@ from aiss.logger import get_logger
 logger = get_logger(__name__)
 
 # ─── Chemins ──────────────────────────────────────────────────────────────────
-PIQRYPT_DIR  = Path.home() / ".piqrypt"
+PIQRYPT_DIR  = Path.home() / ".aiss"
 AGENTS_DIR   = PIQRYPT_DIR / "agents"
 REGISTRY_FILE = PIQRYPT_DIR / "registry.json"
 
@@ -120,7 +119,7 @@ def init_agent_dirs(agent_name: str) -> Path:
     Crée la structure de répertoires complète pour un agent.
 
     Structure créée :
-        ~/.piqrypt/agents/<name>/
+        ~/.aiss/agents/<name>/
             events/plain/
             events/encrypted/
             keys/
@@ -344,7 +343,7 @@ def detect_legacy_structure() -> bool:
     Utilisé par migration.py pour proposer la migration automatique.
 
     Structure legacy = events/plain/ ou events/encrypted/ à la racine
-    de ~/.piqrypt/ (pas dans un sous-répertoire agents/).
+    de ~/.aiss/ (pas dans un sous-répertoire agents/).
     """
     old_plain = PIQRYPT_DIR / "events" / "plain"
     old_enc   = PIQRYPT_DIR / "events" / "encrypted"

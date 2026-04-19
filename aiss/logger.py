@@ -1,11 +1,10 @@
-# SPDX-License-Identifier: Elastic-2.0
+# SPDX-License-Identifier: MIT
 # Copyright (c) 2026 PiQrypt Inc.
 # e-Soleau: DSO2026006483 (19/02/2026) -- DSO2026009143 (12/03/2026)
 #
-# Licensed under the Elastic License 2.0 (ELv2).
-# You may not provide this software as a hosted or managed service
-# to third parties without a commercial license.
-# Commercial license: contact@piqrypt.com
+# sync: generated from piqrypt@v1.8.7 — do not edit manually
+# Source: https://github.com/piqrypt/piqrypt/blob/main//home/runner/work/piqrypt/piqrypt/piqrypt/aiss/logger.py
+# To modify: edit in piqrypt, changes will be synced on next release
 
 """
 PiQrypt Structured Logger
@@ -25,30 +24,30 @@ Rules (Mode Opératoire §7.7):
   - Messages must REASSURE first, then INFORM, then SUGGEST
 
 Exact log messages per action (Mode Opératoire §7 LISTING):
-  Agent start:       [PiQrypt] Identity initialized
-                     [PiQrypt] Local trust chain active
-                     [PiQrypt] Memory protection enabled
-  Event signed:      [PiQrypt] Event signed (hash: 3fa2e...)
-  Chain verified:    [PiQrypt] Chain integrity verified
-  Export Free:       [PiQrypt] Export created: audit.json
-                     [PiQrypt] Export integrity not certified (Pro feature available)
-  Certified w/o lic: [PiQrypt] Certified export requires Pro license
-                     [PiQrypt] Certified exports provide cryptographic proof for audits
-  Status Free:       [PiQrypt] Agent operating with local-only trust
-                     [PiQrypt] Network trust available (Pro)
-  Multi-agent:       [PiQrypt] Agent has interacted with N external agents
-                     [PiQrypt] Network verification available (Pro)
-  Replay Free:       [PiQrypt] Advanced replay detection not enabled (Pro)
-  Memory unlock:     [PiQrypt] Memory unlocked
-  Memory lock:       [PiQrypt] Memory locked
-  Memory migrate:    [PiQrypt] Migrating N events to encrypted storage...
-                     [PiQrypt] Migration complete: N events encrypted
-  A2A handshake:     [PiQrypt] A2A handshake initiated with peer
-                     [PiQrypt] A2A handshake complete: trust established
-  RFC3161 stamp:     [PiQrypt] Trusted timestamp obtained from TSA
-                     [PiQrypt] TSA unreachable — local timestamp only
-  Archive create:    [PiQrypt] Archive created: agent.pqz (N events)
-  Archive import:    [PiQrypt] Archive imported: N events loaded
+  Agent start:       [AISS] Identity initialized
+                     [AISS] Local trust chain active
+                     [AISS] Memory protection enabled
+  Event signed:      [AISS] Event signed (hash: 3fa2e...)
+  Chain verified:    [AISS] Chain integrity verified
+  Export Free:       [AISS] Export created: audit.json
+                     [AISS] Export integrity not certified (Pro feature available)
+  Certified w/o lic: [AISS] Certified export requires Pro license
+                     [AISS] Certified exports provide cryptographic proof for audits
+  Status Free:       [AISS] Agent operating with local-only trust
+                     [AISS] Network trust available (Pro)
+  Multi-agent:       [AISS] Agent has interacted with N external agents
+                     [AISS] Network verification available (Pro)
+  Replay Free:       [AISS] Advanced replay detection not enabled (Pro)
+  Memory unlock:     [AISS] Memory unlocked
+  Memory lock:       [AISS] Memory locked
+  Memory migrate:    [AISS] Migrating N events to encrypted storage...
+                     [AISS] Migration complete: N events encrypted
+  A2A handshake:     [AISS] A2A handshake initiated with peer
+                     [AISS] A2A handshake complete: trust established
+  RFC3161 stamp:     [AISS] Trusted timestamp obtained from TSA
+                     [AISS] TSA unreachable — local timestamp only
+  Archive create:    [AISS] Archive created: agent.pqz (N events)
+  Archive import:    [AISS] Archive imported: N events loaded
 """
 
 import logging
@@ -65,7 +64,7 @@ _shown_hints: set = set()
 
 
 class PiQryptLogger(logging.Logger):
-    """Logger with PRO_HINT level and [PiQrypt] prefix."""
+    """Logger with PRO_HINT level and [AISS] prefix."""
 
     def pro_hint(self, message: str, *args, **kwargs):
         """
@@ -81,20 +80,20 @@ class PiQryptLogger(logging.Logger):
             self._log(PRO_HINT_LEVEL, message, args, **kwargs)
 
     def piqrypt(self, message: str, *args, **kwargs):
-        """[PiQrypt] prefixed INFO log — the standard user-facing format."""
-        self.info(f"[PiQrypt] {message}", *args, **kwargs)
+        """[AISS] prefixed INFO log — the standard user-facing format."""
+        self.info(f"[AISS] {message}", *args, **kwargs)
 
     def piqrypt_hint(self, message: str, *args, **kwargs):
-        """[PiQrypt] prefixed PRO_HINT — appears only during real actions."""
-        self.pro_hint(f"[PiQrypt] {message}", *args, **kwargs)
+        """[AISS] prefixed PRO_HINT — appears only during real actions."""
+        self.pro_hint(f"[AISS] {message}", *args, **kwargs)
 
     def piqrypt_warn(self, message: str, *args, **kwargs):
-        """[PiQrypt] prefixed WARNING."""
-        self.warning(f"[PiQrypt] {message}", *args, **kwargs)
+        """[AISS] prefixed WARNING."""
+        self.warning(f"[AISS] {message}", *args, **kwargs)
 
     def piqrypt_error(self, message: str, *args, **kwargs):
-        """[PiQrypt] prefixed ERROR."""
-        self.error(f"[PiQrypt] {message}", *args, **kwargs)
+        """[AISS] prefixed ERROR."""
+        self.error(f"[AISS] {message}", *args, **kwargs)
 
 
 logging.setLoggerClass(PiQryptLogger)
@@ -159,13 +158,13 @@ def log_identity_initialized(agent_id: str):
 
 
 def log_event_signed(agent_id: str, event_hash: str):
-    """[PiQrypt] Event signed (hash: 3fa2e...)"""
+    """[AISS] Event signed (hash: 3fa2e...)"""
     log = get_logger("piqrypt.stamp")
     log.piqrypt(f"Event signed (hash: {event_hash[:5]}...)")
 
 
 def log_chain_verified(agent_id: str, event_count: int, chain_hash: str = ""):
-    """[PiQrypt] Chain integrity verified"""
+    """[AISS] Chain integrity verified"""
     log = get_logger("piqrypt.verify")
     log.piqrypt("Chain integrity verified")
 
@@ -323,7 +322,7 @@ def log_error(error_type: str, message: str, details: Optional[Dict] = None):
 
 
 def log_debug(event_type: str, message: str, data: Optional[Dict] = None):
-    get_logger("piqrypt").debug(f"[PiQrypt] {event_type}: {message}")
+    get_logger("piqrypt").debug(f"[AISS] {event_type}: {message}")
 
 
 __all__ = [

@@ -1,6 +1,9 @@
-# SPDX-License-Identifier: Elastic-2.0
+# SPDX-License-Identifier: MIT
 # Copyright (c) 2026 PiQrypt Inc.
 # e-Soleau: DSO2026006483 (19/02/2026) -- DSO2026009143 (12/03/2026)
+# sync: generated from piqrypt@v1.8.7 — do not edit manually
+# Source: https://github.com/piqrypt/piqrypt/blob/main//home/runner/work/piqrypt/piqrypt/piqrypt/vigil/vigil_server.py
+# To modify: edit in piqrypt, changes will be synced on next release
 """
 vigil_server.py — PiQrypt Vigil HTTP Server
 ============================================
@@ -115,7 +118,7 @@ log = logging.getLogger("vigil_server")
 DEFAULT_PORT   = 8421
 DEFAULT_HOST   = "127.0.0.1"
 DASHBOARD_FILE = Path(__file__).parent / "vigil_v4_final.html"
-PIQRYPT_DIR    = Path.home() / ".piqrypt"
+PIQRYPT_DIR    = Path.home() / ".aiss"
 
 # TrustGate endpoint — Vigil lui forward les états agents après chaque record
 TRUSTGATE_URL  = os.getenv("TRUSTGATE_URL", "http://127.0.0.1:8422")
@@ -679,7 +682,7 @@ class VIGILHandler(BaseHTTPRequestHandler):
         if BACKEND_AVAILABLE:
             try:
                 # Load events from local store
-                # Structure reelle : ~/.piqrypt/agents/<name>/events/plain/*.json
+                # Structure reelle : ~/.aiss/agents/<name>/events/plain/*.json
                 events = []
                 agent_dir = PIQRYPT_DIR / "agents" / name
                 plain_dir = agent_dir / "events" / "plain"
@@ -1341,9 +1344,9 @@ class VIGILHandler(BaseHTTPRequestHandler):
         import urllib.error
 
         try:
-            # Lire le JWT de licence depuis ~/.piqrypt/license.jwt
+            # Lire le JWT de licence depuis ~/.aiss/license.jwt
             license_jwt = None
-            license_file = Path.home() / ".piqrypt" / "license.jwt"
+            license_file = Path.home() / ".aiss" / "license.jwt"
             if license_file.exists():
                 try:
                     license_jwt = license_file.read_text().strip()
