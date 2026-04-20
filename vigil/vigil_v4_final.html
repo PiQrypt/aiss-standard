@@ -437,7 +437,7 @@ body::before{
   <div class="sb-sec" style="margin-top:6px">Agents</div>
   <div class="sb-agents" id="sb-agents"></div>
   <div style="padding:10px 12px 6px">
-    <button onclick="openWizard()" style="width:100%;padding:8px;border-radius:var(--r);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;border:1px solid var(--ac);color:var(--ac);background:var(--ac2);cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:7px"
+    <button id="sb-new-agent-btn" onclick="openWizard()" style="width:100%;padding:8px;border-radius:var(--r);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;border:1px solid var(--ac);color:var(--ac);background:var(--ac2);cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:7px"
       onmouseover="this.style.background='rgba(0,200,224,.18)'" onmouseout="this.style.background='var(--ac2)'">+ NEW AGENT</button>
   </div>
   <div class="sb-foot">AISS v1.1 · PiQrypt v1.7.0<br><span id="sb-ref" style="color:var(--txd)">Refreshed just now</span></div>
@@ -1277,6 +1277,7 @@ function openAgent(name){
 // ════════════════════════════════════════════
 // WIZARD
 // ════════════════════════════════════════════
+var _DEMO_ACTIVE=false;
 let wizStep=1,wizTier='free',wizBridge='crewai';
 function openWizard(){document.getElementById('wizard').classList.add('open');setWizStep(1)}
 function closeWizard(){document.getElementById('wizard').classList.remove('open')}
@@ -1286,8 +1287,12 @@ function setWizStep(s){
   document.querySelectorAll('.wiz-step').forEach((st,i)=>{st.classList.toggle('active',i===s-1);st.classList.toggle('done',i<s-1)});
   document.getElementById('wiz-ind').textContent=`Step ${s} of 3`;
   document.getElementById('wiz-back').style.visibility=s>1?'visible':'hidden';
-  document.getElementById('wiz-next').textContent=s===3?'✓ Create Agent':'Next →';
-  if(s===3)updateSnippet();
+  var nextBtn=document.getElementById('wiz-next');
+  if(s===3){
+    if(_DEMO_ACTIVE){nextBtn.textContent='⚠ Exit demo first — Ctrl+C in terminal';nextBtn.disabled=true;}
+    else{nextBtn.textContent='✓ Create Agent';nextBtn.disabled=false;}
+    updateSnippet();
+  }else{nextBtn.textContent='Next →';nextBtn.disabled=false;}
 }
 function wizNext(){
   if(wizStep<3){setWizStep(wizStep+1);}
@@ -1322,6 +1327,7 @@ function wizNext(){
       }
     })
     .catch(function(e){
+      if(e.message==='Forbidden'){return;} // toast already shown by _vigilFetch (agent limit or tier gate)
       closeWizard();
       showToast('❌ Réseau: '+e.message);
     });
@@ -1565,6 +1571,163 @@ function _mapAgent(a){
   };
 }
 
+// ════════════════════════════════════════════
+// WELCOME OVERLAY
+// ════════════════════════════════════════════
+function _showWelcome(){
+  var el = document.getElementById('pq-welcome');
+  if(el){ el.style.display=''; return; }
+
+  // Inject scoped styles once
+  if(!document.getElementById('pq-welcome-style')){
+    var st=document.createElement('style');
+    st.id='pq-welcome-style';
+    st.textContent=[
+      '#pq-welcome{position:fixed;inset:0;z-index:400;background:var(--bg);overflow-y:auto;display:flex;flex-direction:column;align-items:center;padding:48px 20px 60px}',
+      '#pq-welcome .wc-inner{width:100%;max-width:900px}',
+      '#pq-welcome .wc-header{text-align:center;margin-bottom:40px}',
+      '#pq-welcome .wc-logo{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--ac);letter-spacing:.06em}',
+      '#pq-welcome .wc-ver{font-family:var(--mono);font-size:11px;color:var(--txd);margin-left:8px}',
+      '#pq-welcome .wc-tagline{font-family:var(--sans);font-size:13px;color:var(--txd);margin-top:8px;letter-spacing:.02em}',
+      '#pq-welcome .wc-cols{display:grid;grid-template-columns:1fr 1fr;gap:40px}',
+      '#pq-welcome .wc-sec-title{font-family:var(--sans);font-size:15px;font-weight:600;color:var(--tx);margin-bottom:4px}',
+      '#pq-welcome .wc-sec-sub{font-family:var(--mono);font-size:9px;color:var(--txd);letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px}',
+      '#pq-welcome .wc-bridge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}',
+      '#pq-welcome .wc-btn{width:100%;padding:9px;border-radius:var(--r);font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;border:1px solid var(--ac);color:var(--ac);background:var(--ac2);cursor:pointer;transition:background .15s}',
+      '#pq-welcome .wc-btn:hover{background:rgba(0,200,224,.18)}',
+      '#pq-welcome .wc-demo-cards{display:flex;flex-direction:column;gap:10px}',
+      '#pq-welcome .wc-demo-card{background:var(--s2);border:1px solid var(--b1);border-radius:var(--r);padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;transition:border-color .15s}',
+      '#pq-welcome .wc-demo-card:hover{border-color:var(--b2)}',
+      '#pq-welcome .wc-launch-btn{padding:6px 14px;border-radius:var(--r);font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.06em;border:1px solid var(--b2);color:var(--txm);background:transparent;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}',
+      '#pq-welcome .wc-launch-btn:hover{border-color:var(--ac);color:var(--ac);background:var(--ac2)}',
+      '#pq-welcome .wc-launch-btn:disabled{opacity:.45;cursor:not-allowed}',
+      '@media(max-width:640px){#pq-welcome .wc-cols{grid-template-columns:1fr}#pq-welcome .wc-bridge-grid{grid-template-columns:repeat(2,1fr)}}',
+    ].join('');
+    document.head.appendChild(st);
+  }
+
+  var ver=(TIER_INFO&&TIER_INFO.version)?'v'+TIER_INFO.version:'';
+
+  var bridges=[
+    {id:'langchain', name:'LangChain', icon:'🔗'},
+    {id:'crewai',    name:'CrewAI',    icon:'🤖'},
+    {id:'autogen',   name:'AutoGen',   icon:'🤝'},
+    {id:'ollama',    name:'Ollama',    icon:'🦙'},
+    {id:'mcp',       name:'MCP',       icon:'⚡'},
+    {id:'openclaw',  name:'OpenClaw',  icon:'🦞'},
+    {id:'session',   name:'Session',   icon:'💬'},
+    {id:'ros',       name:'ROS2',      icon:'⚙️'},
+  ];
+
+  var demos=[
+    {id:'nexus',     name:'Nexus Labs', desc:'DevOps / Infra',  tags:'Ollama · LangGraph'},
+    {id:'pixelflow', name:'PixelFlow',  desc:'Digital Agency',  tags:'CrewAI'},
+    {id:'alphacore', name:'AlphaCore', desc:'Quant Trading',    tags:'AutoGen'},
+  ];
+
+  var bridgeCards=bridges.map(function(b){
+    return '<div class="bridge-card" onclick="_wc_selBridge(\''+b.id+'\',this)">'
+      +'<div class="bridge-logo" style="font-size:15px">'+b.icon+'</div>'
+      +'<div class="bridge-name" style="font-size:11px">'+b.name+'</div>'
+      +'</div>';
+  }).join('');
+
+  var demoCards=demos.map(function(d){
+    return '<div class="wc-demo-card">'
+      +'<div>'
+      +'<div style="font-family:var(--sans);font-size:13px;font-weight:500;color:var(--tx);margin-bottom:3px">'+d.name+'</div>'
+      +'<div style="font-family:var(--mono);font-size:9px;color:var(--txd)">'+d.desc
+        +' &nbsp;·&nbsp; <span style="color:var(--txm)">'+d.tags+'</span></div>'
+      +'</div>'
+      +'<button class="wc-launch-btn" onclick="_wc_launchDemo(\''+d.id+'\',this)">▶ Launch</button>'
+      +'</div>';
+  }).join('');
+
+  el=document.createElement('div');
+  el.id='pq-welcome';
+  el.innerHTML=
+    '<div class="wc-inner">'
+      +'<div class="wc-header">'
+        +'<div><span class="wc-logo">PiQrypt</span><span class="wc-ver">'+ver+'</span></div>'
+        +'<div class="wc-tagline">Trust &amp; Continuity for Autonomous AI Agents</div>'
+      +'</div>'
+      +'<div class="wc-cols">'
+        +'<div>'
+          +'<div class="wc-sec-title">Your first agent</div>'
+          +'<div class="wc-sec-sub">Identity · cryptographic chain · live in Vigil</div>'
+          +'<div class="wc-bridge-grid">'+bridgeCards+'</div>'
+          +'<button id="pq-welcome-create-btn" class="wc-btn" onclick="openWizard()">→ Create agent</button>'
+        +'</div>'
+        +'<div>'
+          +'<div class="wc-sec-title">See it live</div>'
+          +'<div class="wc-sec-sub">Real agents · real events · no setup</div>'
+          +'<div class="wc-demo-cards">'+demoCards+'</div>'
+        +'</div>'
+      +'</div>'
+    +'</div>';
+  document.body.appendChild(el);
+}
+
+function _hideWelcome(){
+  var el=document.getElementById('pq-welcome');
+  if(el) el.style.display='none';
+}
+
+function _updateDemoMode(){
+  fetch('/api/demo/status',{headers:_authHeaders({})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      _DEMO_ACTIVE=!!(d&&d.active);
+      var banner=document.getElementById('pq-demo-banner');
+      if(!banner){
+        banner=document.createElement('div');
+        banner.id='pq-demo-banner';
+        banner.style.cssText='position:fixed;top:0;left:0;right:0;z-index:500;background:rgba(255,170,0,.12);border-bottom:1px solid rgba(255,170,0,.35);padding:5px 16px;text-align:center;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;color:rgba(255,170,0,.9);display:none';
+        banner.textContent='DEMO MODE — sandbox only';
+        document.body.appendChild(banner);
+      }
+      banner.style.display=_DEMO_ACTIVE?'':'none';
+      var nb=document.getElementById('sb-new-agent-btn');
+      if(nb)nb.style.display=_DEMO_ACTIVE?'none':'';
+      var wca=document.getElementById('pq-welcome-create-btn');
+      if(wca)wca.style.display=_DEMO_ACTIVE?'none':'';
+      if(wizStep===3){
+        var nextBtn=document.getElementById('wiz-next');
+        if(nextBtn){
+          if(_DEMO_ACTIVE){nextBtn.textContent='⚠ Exit demo first — Ctrl+C in terminal';nextBtn.disabled=true;}
+          else{nextBtn.textContent='✓ Create Agent';nextBtn.disabled=false;}
+        }
+      }
+    })
+    .catch(function(){_DEMO_ACTIVE=false;});
+}
+
+function _wc_selBridge(id, cardEl){
+  var grid=cardEl.closest('.wc-bridge-grid');
+  if(grid) grid.querySelectorAll('.bridge-card').forEach(function(c){c.classList.remove('sel');});
+  cardEl.classList.add('sel');
+  wizBridge=id;
+  openWizard();
+}
+
+function _wc_launchDemo(family, btn){
+  btn.disabled=true;
+  btn.textContent='…';
+  _vigilFetch('/api/demo/start',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({family:family})
+  }).then(function(r){return r.json();})
+    .then(function(){
+      _hideWelcome();
+      setTimeout(loadFromBackend, 2000);
+    })
+    .catch(function(){
+      btn.disabled=false;
+      btn.textContent='▶ Launch';
+    });
+}
+
 function loadFromBackend(){
   _vigilFetch('/api/summary')
     .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json();})
@@ -1623,6 +1786,10 @@ function loadFromBackend(){
       } else {
         AGENTS=newAgents;
       }
+
+      // ── Welcome overlay — show when no agents are registered ───────────────
+      if (AGENTS.length === 0) { _showWelcome(); } else { _hideWelcome(); }
+      _updateDemoMode();
 
       // ── Trigger flash on agents with new events ────────────────────
       AGENTS.forEach(function(a){
@@ -2792,6 +2959,7 @@ function _ckApplyFilter(){
 }
 
 loadFromBackend();
+_updateDemoMode();
 setInterval(loadFromBackend,5000);
 // Start demo stamp simulation — will be overridden by real data when backend is live
 setTimeout(_demoStampLoop, 2000);
