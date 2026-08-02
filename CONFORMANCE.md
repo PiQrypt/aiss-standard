@@ -27,6 +27,8 @@ All AISS implementations MUST pass the normative test vectors.
 | `test_vectors/events.json` | Event hashing and structure | 3 | 1 |
 | `test_vectors/fork.json` | Fork detection and resolution | 6 | 1 |
 | `test_vectors/replay.json` | Anti-replay nonce protection | 5 | 1 |
+| `test_vectors/canonical_numbers.json` | RFC 8785 Table 1 number serialization | 24 | 1 |
+| `test_vectors/canonical_ordering.json` | UTF-16 key ordering + IEEE-754 integer range | 4 | 1 |
 
 ### Planned (v2.1)
 
@@ -47,6 +49,15 @@ pytest tests/test_vectors.py -v
 ```
 
 All Level 1 vectors must pass for a conformant AISS-1 implementation.
+
+**On `canonical.json` vs `canonical_numbers.json`.** The original five canonical
+vectors contain no float, no non-ASCII character, no non-BMP character and no
+escape-requiring character, so they cannot distinguish a conformant serializer from
+one that diverges on numbers or on key order. `canonical_numbers.json` is RFC 8785
+Table 1 transcribed whole, and `canonical_ordering.json` covers the UTF-16 sort and
+the double-range boundary. Between them they are the vectors that make cross-language
+conformance mean something: an implementation that passes only the original five can
+still produce different signature bytes for the same event.
 
 ---
 
