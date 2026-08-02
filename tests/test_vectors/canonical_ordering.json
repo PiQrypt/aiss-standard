@@ -1,0 +1,38 @@
+{
+  "description": "RFC 8785 3.2.3 key ordering (UTF-16 code units, not code points) and the IEEE-754 integer range. Both are invisible to the ASCII-only vectors in canonical.json.",
+  "level": 1,
+  "tests": [
+    {
+      "name": "non_bmp_sorts_before_high_bmp",
+      "input": {
+        "￿": 1,
+        "😀": 2
+      },
+      "expected_canonical": "{\"😀\":2,\"￿\":1}",
+      "why": "U+1F600 encodes as the surrogate pair D83D DE00; D83D < FFFF in UTF-16, so it sorts FIRST. Code-point order gets this backwards.",
+      "kind": "key_order"
+    },
+    {
+      "name": "ascii_unaffected",
+      "input": {
+        "z": 1,
+        "a": 2
+      },
+      "expected_canonical": "{\"a\":2,\"z\":1}",
+      "kind": "key_order"
+    },
+    {
+      "name": "max_safe_ok",
+      "input": 9007199254740992,
+      "expect": "accepted",
+      "kind": "integer_range"
+    },
+    {
+      "name": "beyond_double_refused",
+      "input": 9007199254740993,
+      "expect": "rejected",
+      "why": "exact in Python, reads back as ...992 in any ECMAScript implementation — different hash, failed signature",
+      "kind": "integer_range"
+    }
+  ]
+}

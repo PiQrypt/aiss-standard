@@ -1,0 +1,127 @@
+{
+  "description": "RFC 8785 Appendix/Table 1 \u2014 normative ECMAScript-compatible number serialization. Each vector gives the IEEE-754 double as 16 hex digits (big-endian) and the exact string RFC 8785 requires.",
+  "source": "https://www.rfc-editor.org/rfc/rfc8785.txt Table 1",
+  "level": 1,
+  "tests": [
+    {
+      "name": "zero",
+      "ieee754_hex": "0000000000000000",
+      "expected_number": "0"
+    },
+    {
+      "name": "minus_zero",
+      "ieee754_hex": "8000000000000000",
+      "expected_number": "0"
+    },
+    {
+      "name": "min_pos_number",
+      "ieee754_hex": "0000000000000001",
+      "expected_number": "5e-324"
+    },
+    {
+      "name": "min_neg_number",
+      "ieee754_hex": "8000000000000001",
+      "expected_number": "-5e-324"
+    },
+    {
+      "name": "max_pos_number",
+      "ieee754_hex": "7fefffffffffffff",
+      "expected_number": "1.7976931348623157e+308"
+    },
+    {
+      "name": "max_neg_number",
+      "ieee754_hex": "ffefffffffffffff",
+      "expected_number": "-1.7976931348623157e+308"
+    },
+    {
+      "name": "max_pos_int____1",
+      "ieee754_hex": "4340000000000000",
+      "expected_number": "9007199254740992"
+    },
+    {
+      "name": "max_neg_int____1",
+      "ieee754_hex": "c340000000000000",
+      "expected_number": "-9007199254740992"
+    },
+    {
+      "name": "~2**68_________2",
+      "ieee754_hex": "4430000000000000",
+      "expected_number": "295147905179352830000"
+    },
+    {
+      "name": "sample",
+      "ieee754_hex": "44b52d02c7e14af5",
+      "expected_number": "9.999999999999997e+22"
+    },
+    {
+      "name": "sample_2",
+      "ieee754_hex": "44b52d02c7e14af6",
+      "expected_number": "1e+23"
+    },
+    {
+      "name": "sample_3",
+      "ieee754_hex": "44b52d02c7e14af7",
+      "expected_number": "1.0000000000000001e+23"
+    },
+    {
+      "name": "sample_4",
+      "ieee754_hex": "444b1ae4d6e2ef4e",
+      "expected_number": "999999999999999700000"
+    },
+    {
+      "name": "sample_5",
+      "ieee754_hex": "444b1ae4d6e2ef4f",
+      "expected_number": "999999999999999900000"
+    },
+    {
+      "name": "sample_6",
+      "ieee754_hex": "444b1ae4d6e2ef50",
+      "expected_number": "1e+21"
+    },
+    {
+      "name": "sample_7",
+      "ieee754_hex": "3eb0c6f7a0b5ed8c",
+      "expected_number": "9.999999999999997e-7"
+    },
+    {
+      "name": "sample_8",
+      "ieee754_hex": "3eb0c6f7a0b5ed8d",
+      "expected_number": "0.000001"
+    },
+    {
+      "name": "sample_9",
+      "ieee754_hex": "41b3de4355555553",
+      "expected_number": "333333333.3333332"
+    },
+    {
+      "name": "sample_10",
+      "ieee754_hex": "41b3de4355555554",
+      "expected_number": "333333333.33333325"
+    },
+    {
+      "name": "sample_11",
+      "ieee754_hex": "41b3de4355555555",
+      "expected_number": "333333333.3333333"
+    },
+    {
+      "name": "sample_12",
+      "ieee754_hex": "41b3de4355555556",
+      "expected_number": "333333333.3333334"
+    },
+    {
+      "name": "sample_13",
+      "ieee754_hex": "41b3de4355555557",
+      "expected_number": "333333333.33333343"
+    },
+    {
+      "name": "sample_14",
+      "ieee754_hex": "becbf647612f3696",
+      "expected_number": "-0.0000033333333333333333"
+    },
+    {
+      "name": "round_to_even__4",
+      "ieee754_hex": "43143ff3c1cb0959",
+      "expected_number": "1424953923781206.2"
+    }
+  ]
+}
