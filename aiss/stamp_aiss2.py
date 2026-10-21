@@ -4,7 +4,7 @@
 #
 # Part of the AISS protocol specification.
 # Free to use, modify, and redistribute -- see root LICENSE for details.
-# sync: generated from piqrypt@v1.8.7 — do not edit manually
+# sync: generated from piqrypt@v1.9.2 — do not edit manually
 # Source: https://github.com/piqrypt/piqrypt/blob/main//home/runner/work/piqrypt/piqrypt/piqrypt/aiss/stamp_aiss2.py
 # To modify: edit in piqrypt, changes will be synced on next release
 
@@ -15,11 +15,11 @@ Post-quantum + classical dual signatures for maximum security.
 Includes mandatory fields for AISS-2 compliance (RFC §11.3):
   - trusted_timestamp:  RFC 3161 TSA token (required, may be pending)
   - authority_chain:    Delegation chain from legal entity to agent
-  - signatures:         Ed25519 + ML-DSA-65 (Dilithium3) dual signatures
+  - signatures:         Ed25519 + ML-DSA-65 dual signatures
 
 Cryptographic algorithms:
-  - Ed25519    (classical, backward compatible)
-  - Dilithium3 / ML-DSA-65 (post-quantum, NIST FIPS 204)
+  - Ed25519   (classical, backward compatible)
+  - ML-DSA-65 (post-quantum, NIST FIPS 204)
 
 Recommended by NIST until 2030+ for transition period.
 """
@@ -32,7 +32,7 @@ from aiss.crypto import ed25519, dilithium
 from aiss.canonical import canonicalize
 from aiss.stamp import generate_nonce
 from aiss.license import require_pro
-from aiss.logger import log_event_signed, log_debug
+from aiss.logger import log_event_signed_alias, log_debug
 from aiss.telemetry import track
 from aiss.exceptions import CryptoBackendError
 
@@ -88,9 +88,9 @@ def stamp_event_aiss2_hybrid(
     # Check Dilithium backend availability
     if not dilithium or not dilithium.is_available():
         raise CryptoBackendError(
-            "Dilithium3",
-            "AISS-2 requires Dilithium3 backend.\n"
-            "Install: pip install liboqs-python"
+            "ML-DSA-65",
+            "AISS-2 requires ML-DSA-65 backend.\n"
+            "Install: pip install liboqs-python>=0.12.0"
         )
 
     # Generate nonce and timestamp if not provided
@@ -114,15 +114,8 @@ def stamp_event_aiss2_hybrid(
     if authority_chain:
         event["authority_chain"] = authority_chain
 
-    # Placeholder for trusted_timestamp (filled after TSA request)
-    event["trusted_timestamp"] = {
-        "status": "pending",
-        "rfc3161_token": None,
-        "tsa_id": None,
-        "timestamp": None,
-    }
-
-    # Canonicalize for signing (includes authority_chain but pending trusted_timestamp)
+    # Canonicalize for signing — trusted_timestamp is NOT included (it is a detached field
+    # added after signing so that the TSA token does not invalidate the signatures).
     canonical = canonicalize(event)
 
     log_debug("aiss2_signing", "Generating hybrid signatures", {
@@ -149,6 +142,14 @@ def stamp_event_aiss2_hybrid(
         }
     }
 
+    # Add trusted_timestamp placeholder AFTER signing (detached — not covered by signatures)
+    event["trusted_timestamp"] = {
+        "status": "pending",
+        "rfc3161_token": None,
+        "tsa_id": None,
+        "timestamp": None,
+    }
+
     # Request TSA timestamp (Pro feature — graceful degradation if offline)
     if tsa_stamp_after:
         try:
@@ -159,7 +160,7 @@ def stamp_event_aiss2_hybrid(
             # Leave trusted_timestamp.status = "pending"
 
     # Logging
-    log_event_signed(agent_id, payload.get("event_type", "unknown"), nonce)
+    log_event_signed_alias(agent_id, payload.get("event_type", "unknown"), nonce)
     log_debug("aiss2_signed", "Hybrid signatures generated", {
         "ed25519_size": len(sig_ed25519),
         "dilithium_size": len(sig_dilithium),
@@ -240,9 +241,9 @@ def verify_aiss2_hybrid(event: Dict[str, Any], public_key_ed25519: bytes, public
     if not classical or not post_quantum:
         raise InvalidSignatureError("AISS-2 event missing classical or post_quantum signature")
 
-    # Create event copy without signatures
-    event_copy = event.copy()
-    event_copy.pop("signatures")
+    # Reconstruct the signed content: remove signatures and trusted_timestamp
+    # (trusted_timestamp is a detached field — it was never covered by the signatures)
+    event_copy = {k: v for k, v in event.items() if k not in ("signatures", "trusted_timestamp")}
 
     # Canonicalize
     canonical = canonicalize(event_copy)
@@ -264,7 +265,7 @@ def verify_aiss2_hybrid(event: Dict[str, Any], public_key_ed25519: bytes, public
 
     log_debug("aiss2_verified", "Hybrid signatures verified", {
         "ed25519": "valid",
-        "dilithium3": "valid"
+        "ml_dsa_65": "valid"
     })
 
     return True

@@ -2,7 +2,7 @@
 # Copyright (c) 2026 PiQrypt Inc.
 # e-Soleau: DSO2026006483 (19/02/2026) -- DSO2026009143 (12/03/2026)
 #
-# sync: generated from piqrypt@v1.8.7 — do not edit manually
+# sync: generated from piqrypt@v1.9.2 — do not edit manually
 # Source: https://github.com/piqrypt/piqrypt/blob/main//home/runner/work/piqrypt/piqrypt/piqrypt/aiss/agent_context.py
 # To modify: edit in piqrypt, changes will be synced on next release
 
@@ -225,7 +225,7 @@ AGENT_METADATA: Dict[str, Any] = {
         "RFC 8785": "JSON Canonicalization Scheme (mandatory)",
         "RFC 3161": "Trusted Timestamping (Pro)",
         "RFC 4122": "UUID v4 for nonces",
-        "NIST FIPS 204": "ML-DSA-65 (Dilithium3)",
+        "NIST FIPS 204": "ML-DSA-65",
         "NIST FIPS 203": "ML-KEM-768 (Kyber)"
     },
 

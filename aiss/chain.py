@@ -4,6 +4,9 @@
 #
 # Part of the AISS protocol specification.
 # Free to use, modify, and redistribute -- see root LICENSE for details.
+# sync: generated from piqrypt@v1.9.2 — do not edit manually
+# Source: https://github.com/piqrypt/piqrypt/blob/main//home/runner/work/piqrypt/piqrypt/piqrypt/aiss/chain.py
+# To modify: edit in piqrypt, changes will be synced on next release
 
 """
 Hash Chain Operations (RFC Section 9)
@@ -47,9 +50,12 @@ def compute_event_hash(event: Dict[str, Any]) -> str:
         >>> len(event_hash)
         64
     """
-    # Create copy without signature
+    # Exclude fields that are not part of the signed content:
+    # - 'signature'         : the signature itself (AISS-1)
+    # - 'trusted_timestamp' : detached field added after signing (AISS-1 and AISS-2)
     event_copy = event.copy()
     event_copy.pop('signature', None)
+    event_copy.pop('trusted_timestamp', None)
 
     # Canonicalize and hash
     canonical = canonicalize(event_copy)
