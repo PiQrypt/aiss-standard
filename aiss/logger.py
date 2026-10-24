@@ -2,7 +2,9 @@
 # Copyright (c) 2026 PiQrypt Inc.
 # e-Soleau: DSO2026006483 (19/02/2026) -- DSO2026009143 (12/03/2026)
 #
-# sync: generated from piqrypt@v1.8.7 — do not edit manually
+# Part of the AISS protocol specification.
+# Free to use, modify, and redistribute -- see root LICENSE for details.
+# sync: generated from piqrypt@v1.10.0 — do not edit manually
 # Source: https://github.com/piqrypt/piqrypt/blob/main//home/runner/work/piqrypt/piqrypt/piqrypt/aiss/logger.py
 # To modify: edit in piqrypt, changes will be synced on next release
 

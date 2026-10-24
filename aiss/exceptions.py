@@ -4,6 +4,9 @@
 #
 # Part of the AISS protocol specification.
 # Free to use, modify, and redistribute -- see root LICENSE for details.
+# sync: generated from piqrypt@v1.10.0 — do not edit manually
+# Source: https://github.com/piqrypt/piqrypt/blob/main//home/runner/work/piqrypt/piqrypt/piqrypt/aiss/exceptions.py
+# To modify: edit in piqrypt, changes will be synced on next release
 
 """
 AISS Exception Classes
@@ -59,8 +62,10 @@ class InvalidChainError(AISSError):
         super().__init__(message)
 
 
-class InvalidCanonicalJSONError(AISSError):
-    """Raised when JSON is not RFC 8785 compliant (RFC Section 3)"""
+class InvalidCanonicalJSONError(AISSError, ValueError):
+    """Raised when JSON is not RFC 8785 compliant (RFC Section 3).
+
+    Also a ValueError: canonicalization errors have always been catchable as such."""
 
     def __init__(self, message: str = "Invalid canonical JSON"):
         super().__init__(message)

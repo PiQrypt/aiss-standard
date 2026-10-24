@@ -1,10 +1,13 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 PiQrypt Inc.
 # e-Soleau: DSO2026006483 (19/02/2026) -- DSO2026009143 (12/03/2026)
+# sync: generated from piqrypt@v1.10.0 — do not edit manually
+# Source: https://github.com/piqrypt/piqrypt/blob/main//home/runner/work/piqrypt/piqrypt/piqrypt/aiss/crypto/ed25519.py
+# To modify: edit in piqrypt, changes will be synced on next release
 """
 Ed25519 Cryptographic Backend (AISS-1)
 
-RFC 8032 compliant Ed25519 using Python stdlib 'cryptography' package.
+Ed25519 (RFC 8032) using the third-party 'cryptography' package.
 Zero external dependencies beyond 'cryptography' (ships with Python 3.x).
 
 Encoding strategy:

@@ -4,7 +4,7 @@
 #
 # Part of the AISS protocol specification.
 # Free to use, modify, and redistribute -- see root LICENSE for details.
-# sync: generated from piqrypt@v1.9.2 — do not edit manually
+# sync: generated from piqrypt@v1.10.0 — do not edit manually
 # Source: https://github.com/piqrypt/piqrypt/blob/main//home/runner/work/piqrypt/piqrypt/piqrypt/aiss/verify.py
 # To modify: edit in piqrypt, changes will be synced on next release
 
@@ -127,6 +127,76 @@ def verify_event(
     return True
 
 
+# ─── Formes d'identité AISS-2.1 (B.4) ────────────────────────────────────────
+
+def _identity_form(identity: Dict[str, Any]) -> str:
+    """
+    Classe un document d'identité :
+      - "classical" : public_key seul (AISS-1, comportement inchangé)
+      - "upgraded"  : identité AISS-1 mise à niveau (public_key + public_key_pq + binding)
+      - "native"    : identité hybride native (public_key_classical + public_key_pq)
+
+    Raises:
+        InvalidChainError: document ambigu (public_key_classical avec binding ou public_key)
+    """
+    if "public_key_classical" in identity:
+        if "binding" in identity or "public_key" in identity:
+            raise InvalidChainError(
+                "Ambiguous identity: public_key_classical cannot be combined with "
+                "binding or public_key"
+            )
+        return "native"
+    if "binding" in identity or "public_key_pq" in identity:
+        return "upgraded"
+    return "classical"
+
+
+def _resolve_aiss21_identity(identity, form, public_key_pq_param):
+    """
+    Valide une identité AISS-2.1 (dérivation des deux clés, ou liaison valide) et
+    renvoie (public_key_ed25519, public_key_pq, binding_assurance).
+
+    Raises:
+        InvalidChainError: identité invalide, ou public_key_pq fourni différent de
+            celui de l'identité (jamais de choix silencieux)
+    """
+    from aiss.identity import IdentityBindingError, identity_binding_assurance, _decode_b64_prefixed
+
+    try:
+        assurance = identity_binding_assurance(identity)
+        source = identity if form == "native" else identity["binding"]
+        public_key = _decode_b64_prefixed(source["public_key_classical"], "public_key_classical", 32)
+        public_key_pq = _decode_b64_prefixed(source["public_key_pq"], "public_key_pq", 1952)
+    except (IdentityBindingError, KeyError, TypeError) as e:
+        raise InvalidChainError(f"Invalid AISS-2.1 identity: {e}")
+
+    if public_key_pq_param is not None and bytes(public_key_pq_param) != public_key_pq:
+        raise InvalidChainError(
+            "public_key_pq parameter differs from the identity's ML-DSA-65 key"
+        )
+    return public_key, public_key_pq, assurance
+
+
+def _check_aiss21_events(events: List[Dict[str, Any]], identity: Dict[str, Any], form: str) -> None:
+    """agent_id des événements et règle anti-downgrade (erreur avec l'index)."""
+    agent_id = identity.get("agent_id")
+    seen_aiss21 = False
+    for i, event in enumerate(events):
+        if not isinstance(event, dict):
+            raise InvalidChainError("Event must be an object", i)
+        if event.get("agent_id") != agent_id:
+            raise InvalidChainError("Event agent_id does not match identity agent_id", i)
+        is_21 = event.get("version") == "AISS-2.1"
+        if form == "native" and not is_21:
+            raise InvalidChainError(
+                "Downgrade: a native hybrid identity only accepts AISS-2.1 events", i)
+        if form == "upgraded":
+            if seen_aiss21 and not is_21:
+                raise InvalidChainError(
+                    "Downgrade: no AISS-1 or AISS-2.0 event may follow the first AISS-2.1 event", i)
+            seen_aiss21 = seen_aiss21 or is_21
+
+
 def verify_chain(
     events: List[Dict[str, Any]],
     identity: Dict[str, Any],
@@ -167,22 +237,39 @@ def verify_chain(
         >>> verify_chain(events, agent_identity)
         True
     """
+    if not isinstance(events, (list, tuple)):
+        raise InvalidChainError(
+            f"events must be a list of event objects, got {type(events).__name__}")
+    if not isinstance(identity, dict):
+        raise InvalidChainError(
+            f"identity must be an object, got {type(identity).__name__}")
+
     if not events:
         return True
 
-    # Extract public key from identity
-    public_key_b58 = identity.get('public_key')
-    if not public_key_b58:
-        raise InvalidChainError("Identity missing public_key field")
+    form = _identity_form(identity)
+    if form != "classical":
+        # AISS-2.1 identity (upgraded or native hybrid): keys come from the validated identity
+        public_key, public_key_pq, _ = _resolve_aiss21_identity(identity, form, public_key_pq)
+        _check_aiss21_events(events, identity, form)
+    else:
+        # Extract public key from identity
+        public_key_b58 = identity.get('public_key')
+        if not public_key_b58:
+            raise InvalidChainError("Identity missing public_key field")
 
-    try:
-        public_key = ed25519.decode_base64(public_key_b58)
-    except Exception as e:
-        raise InvalidChainError(f"Invalid public key encoding: {e}")
+        try:
+            public_key = ed25519.decode_base64(public_key_b58)
+        except Exception as e:
+            raise InvalidChainError(f"Invalid public key encoding: {e}")
 
     # Verify all signatures
     for i, event in enumerate(events):
+        if not isinstance(event, dict):
+            raise InvalidChainError("Event must be an object", i)
         version = event.get("version", "")
+        if not isinstance(version, str):
+            raise InvalidChainError("Event version must be a string", i)
         if version.startswith("AISS-2"):
             if public_key_pq is None:
                 raise InvalidChainError(
@@ -229,9 +316,78 @@ def verify_chain(
     return True
 
 
+TSA_STATUSES = ("verified", "structure_only", "pending", "invalid", "absent")
+
+
+def _tsa_report(events: List[Dict[str, Any]], trust_roots=None) -> Dict[str, Any]:
+    """
+    Count the events by TSA status. Informational: it never changes the validity verdict.
+
+    verified / structure_only / pending / invalid come from aiss.rfc3161.verify_tsa_token;
+    "absent" means the event carries no trusted_timestamp field at all. A pending event is
+    never counted as anchored, and neither is a structure_only one. Without aiss.rfc3161
+    (MIT-only build) tokens cannot be checked: those present are counted structure_only
+    (structural presence only) and "verification_available" is False.
+    """
+    counts = {status: 0 for status in TSA_STATUSES}
+    details: List[Dict[str, Any]] = []
+    try:
+        from aiss.rfc3161 import load_trust_roots, verify_tsa_token
+        available = True
+        roots = load_trust_roots(trust_roots)
+    except ImportError:
+        from aiss.tsa_token import has_tsa_token
+        available = False
+        roots = []
+    except Exception as exc:
+        from aiss.rfc3161 import verify_tsa_token
+        available, roots = True, []
+        details.append({"index": None, "status": "invalid", "reason": f"trust roots unreadable: {exc}"})
+
+    for index, event in enumerate(events):
+        if not isinstance(event, dict):
+            counts["invalid"] += 1
+            details.append({"index": index, "status": "invalid", "reason": "event is not an object"})
+            continue
+        if "trusted_timestamp" not in event:
+            counts["absent"] += 1
+            continue
+        if not available:
+            trusted = event["trusted_timestamp"]
+            if has_tsa_token(event):
+                status, reason = "structure_only", "aiss.rfc3161 is not available: token present, not verified"
+            elif isinstance(trusted, dict) and trusted.get("status") == "pending":
+                status, reason = "pending", "no TSA token was obtained yet"
+            elif not isinstance(trusted, dict):
+                status, reason = "invalid", "trusted_timestamp is not an object"
+            else:
+                status, reason = "invalid", "the event carries no TSA token"
+            counts[status] += 1
+            details.append({"index": index, "status": status, "reason": reason})
+            continue
+        try:
+            result = verify_tsa_token(event, roots)
+        except Exception as exc:
+            result = {"status": "invalid", "reason": f"verification error: {exc}", "gen_time": None}
+        counts[result["status"]] += 1
+        if result["status"] != "verified":
+            details.append({"index": index, "status": result["status"], "reason": result["reason"]})
+
+    section = dict(counts)
+    section.update({
+        "total": len(events),
+        "verification_available": available,
+        "trust_roots": len(roots),
+        "revocation": "not_checked",
+        "details": details,
+    })
+    return section
+
+
 def get_verification_report(
     events: List[Dict[str, Any]],
-    identity: Dict[str, Any]
+    identity: Dict[str, Any],
+    trust_roots=None,
 ) -> Dict[str, Any]:
     """
     Generate detailed verification report.
@@ -241,6 +397,7 @@ def get_verification_report(
     Args:
         events: List of events
         identity: Agent identity
+        trust_roots: Optional TSA trust store for the "tsa" section (see aiss.rfc3161.load_trust_roots)
 
     Returns:
         Verification report dict with:
@@ -250,6 +407,9 @@ def get_verification_report(
         - forks_detected: List of fork hashes
         - replay_attacks: List of replay attack nonces
         - errors: List of error messages
+        - binding_assurance: "hybrid", "classical_only" or None
+        - tsa: event counts per TSA status (verified, structure_only, pending, invalid,
+          absent), informational and never silent; it does not change "valid"
     """
     report = {
         "valid": True,
@@ -258,17 +418,34 @@ def get_verification_report(
         "timestamps_valid": True,
         "forks_detected": [],
         "replay_attacks": [],
-        "errors": []
+        "errors": [],
+        "binding_assurance": None,  # "hybrid", "classical_only" or None (classical identity)
+        "tsa": None,
     }
+
+    report["tsa"] = _tsa_report(
+        events if isinstance(events, (list, tuple)) else [], trust_roots)
 
     if not events:
         return report
 
     # Verify signatures
     try:
-        public_key = ed25519.decode_base64(identity.get('public_key'))
-        for i, event in enumerate(events):
-            verify_signature(event, public_key)
+        form = _identity_form(identity)
+        if form == "classical":
+            public_key = ed25519.decode_base64(identity.get('public_key'))
+            for i, event in enumerate(events):
+                verify_signature(event, public_key)
+        else:
+            from aiss.stamp_aiss2 import verify_aiss2_hybrid
+            public_key, public_key_pq, assurance = _resolve_aiss21_identity(identity, form, None)
+            report["binding_assurance"] = assurance
+            _check_aiss21_events(events, identity, form)
+            for i, event in enumerate(events):
+                if str(event.get("version", "")).startswith("AISS-2"):
+                    verify_aiss2_hybrid(event, public_key, public_key_pq)
+                else:
+                    verify_signature(event, public_key)
     except Exception as e:
         report["signatures_valid"] = False
         report["valid"] = False
@@ -341,7 +518,10 @@ def verify_audit_chain(audit_data: Dict[str, Any]) -> bool:
 
     # If identity with public key is provided, do full signature verification
     identity = audit_data.get("agent_identity") or audit_data.get("identity")
-    if identity and identity.get("public_key"):
+    if isinstance(identity, dict) and any(
+        field in identity
+        for field in ("public_key", "public_key_classical", "public_key_pq", "binding")
+    ):
         return verify_chain(events, identity, check_forks=False, check_replay=False)
 
     # Otherwise verify chain linkage only (structural integrity)

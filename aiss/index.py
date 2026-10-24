@@ -2,7 +2,7 @@
 # Copyright (c) 2026 PiQrypt Inc.
 # e-Soleau: DSO2026006483 (19/02/2026) -- DSO2026009143 (12/03/2026)
 #
-# sync: generated from piqrypt@v1.8.7 — do not edit manually
+# sync: generated from piqrypt@v1.10.0 — do not edit manually
 # Source: https://github.com/piqrypt/piqrypt/blob/main//home/runner/work/piqrypt/piqrypt/piqrypt/aiss/index.py
 # To modify: edit in piqrypt, changes will be synced on next release
 
@@ -35,7 +35,7 @@ Index schema v1.6:
         session_id          TEXT     -- v1.6: multi-agent session_id
     );
 
-RFC Compliance:
+Design notes:
     - Index contains ONLY metadata (no sensitive payloads)
     - Events remain signed + hash-chained in storage files
     - Nonce retention for 7 years (AISS-2 §11.2)

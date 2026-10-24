@@ -1,13 +1,13 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 PiQrypt Inc.
 # e-Soleau: DSO2026006483 (19/02/2026) -- DSO2026009143 (12/03/2026)
-# sync: generated from piqrypt@v1.9.2 — do not edit manually
+# sync: generated from piqrypt@v1.10.0 — do not edit manually
 # Source: https://github.com/piqrypt/piqrypt/blob/main//home/runner/work/piqrypt/piqrypt/piqrypt/aiss/crypto/dilithium_liboqs.py
 # To modify: edit in piqrypt, changes will be synced on next release
 """
 ML-DSA-65 Cryptographic Backend (AISS-2) - Hybrid Implementation
 
-NIST FIPS 204 compliant post-quantum signature scheme.
+Implements the post-quantum signature scheme ML-DSA-65 (NIST FIPS 204).
 Supports multiple backends with automatic fallback:
   1. liboqs-python >= 0.12.0 (preferred, faster, C-based)
   2. dilithium-py >= 1.0.0   (fallback, pure Python)
@@ -68,7 +68,14 @@ DEMO_LIMIT = 1000
 
 
 def _has_valid_license() -> bool:
-    """Check whether any license source grants quantum access."""
+    """Check whether any license source grants quantum access.
+
+    Returns True when no licence system exists at all: in the aiss-standard
+    (MIT) build the module aiss.license is absent, so there is nothing to
+    check and no demo limit applies. This mirrors aiss.stamp_aiss2._pro_only.
+    Any other failure (for example a missing dependency inside aiss.license)
+    keeps the limit active.
+    """
     # Legacy: any non-empty value bypassed the demo limit before v1.9.2
     if os.getenv("AISS2_LICENSE_KEY"):
         return True
@@ -76,6 +83,9 @@ def _has_valid_license() -> bool:
         # Lazy import to avoid circular dependencies at module load time
         from aiss.license import get_license  # type: ignore
         return get_license().has_feature("quantum")
+    except ModuleNotFoundError as exc:
+        # Only the licence module itself being absent lifts the limit.
+        return exc.name == "aiss.license"
     except Exception:
         return False
 
@@ -87,7 +97,7 @@ def _check_available():
             "ML-DSA-65",
             "Post-quantum crypto not installed.\n"
             "Install one of:\n"
-            "  pip install liboqs-python>=0.12.0  (recommended)\n"
+            "  pip install \"liboqs-python>=0.16.0.1\"  (recommended)\n"
             "  pip install dilithium-py>=1.0.0    (pure Python)\n"
         )
 
@@ -115,13 +125,13 @@ def _check_license():
 
 def generate_keypair() -> tuple[bytes, bytes]:
     """
-    Generate Dilithium3 keypair.
+    Generate an ML-DSA-65 keypair.
 
     Returns:
         Tuple of (private_key_bytes, public_key_bytes)
 
     Raises:
-        CryptoBackendError: If Dilithium3 backend not available
+        CryptoBackendError: If the ML-DSA-65 backend is not available
     """
     _check_available()
     _check_license()
@@ -147,14 +157,14 @@ def generate_keypair() -> tuple[bytes, bytes]:
 
 def sign(private_key: bytes, message: bytes) -> bytes:
     """
-    Sign message with Dilithium3 private key.
+    Sign a message with an ML-DSA-65 private key.
 
     Args:
-        private_key: Dilithium3 private key bytes
+        private_key: ML-DSA-65 private key bytes
         message: Message bytes to sign
 
     Returns:
-        Dilithium3 signature bytes (~3293 bytes)
+        ML-DSA-65 signature bytes (3309 bytes)
 
     Raises:
         CryptoBackendError: If backend not available or signing fails
@@ -180,10 +190,10 @@ def sign(private_key: bytes, message: bytes) -> bytes:
 
 def verify(public_key: bytes, message: bytes, signature: bytes) -> bool:
     """
-    Verify Dilithium3 signature.
+    Verify an ML-DSA-65 signature.
 
     Args:
-        public_key: Dilithium3 public key bytes
+        public_key: ML-DSA-65 public key bytes
         message: Original message bytes
         signature: Signature to verify
 
@@ -214,7 +224,7 @@ def verify(public_key: bytes, message: bytes, signature: bytes) -> bool:
 
 def is_available() -> bool:
     """
-    Check if Dilithium3 backend is available.
+    Check if an ML-DSA-65 backend is available.
 
     Returns:
         True if AISS-2 crypto is available
