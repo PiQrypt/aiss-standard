@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (c) 2026 PiQrypt Inc.
 # e-Soleau: DSO2026006483 (19/02/2026) -- DSO2026009143 (12/03/2026)
-# sync: generated from piqrypt@v1.8.10 — do not edit manually
+# sync: generated from piqrypt@v1.11.0 — do not edit manually
 # Source: https://github.com/piqrypt/piqrypt/blob/main//home/runner/work/piqrypt/piqrypt/piqrypt/vigil/vigil_server.py
 # To modify: edit in piqrypt, changes will be synced on next release
 """
@@ -1680,7 +1680,7 @@ class VIGILServer:
         log.info("  Tier      → %s  [%s]", tier.upper(), lic_status.upper())
         if lic_exp:
             log.info("  Expires   → %s", lic_exp)
-        log.info("  TrustGate → %s", tier_inf["trustgate_level"] or "unavailable (upgrade to Pro)")
+        log.info("  TrustGate → %s", tier_inf["trustgate_level"] or "demo (Free tier)")
         log.info(
             "  Features  → record=%s  alerts=%s  export_pdf=%s  export_pqz=%s  full_vrs=%s  bridges=%s",  # noqa: E501
             "✅" if vf.get("record")      else "🔒",
